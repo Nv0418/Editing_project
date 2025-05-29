@@ -49,8 +49,8 @@ class StyledSubtitleLayer:
         )
         
         # Store safe area bounds for text constraint
-        self.safe_left = 100 if safe_zones else 50  # Increased from 35
-        self.safe_right = resolution[0] - 100 if safe_zones else resolution[0] - 50
+        self.safe_left = 50 if safe_zones else 30  # Reduced to match base_style
+        self.safe_right = resolution[0] - 50 if safe_zones else resolution[0] - 30
         self.safe_width = self.safe_right - self.safe_left
         
         # Group words into windows (3 words per window for now)

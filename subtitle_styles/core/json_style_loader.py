@@ -106,16 +106,57 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
         else:
             bg_color = typo['colors']['background']
         
-        # Create image
-        img_width, img_height = 1080, 300
+        # Create larger image to accommodate bigger text with outline
+        img_width = 1080
+        # Calculate estimated height based on font size and outline
+        estimated_height = int(font_size * 2.5) + 200  # Extra space for safety
+        img_height = max(600, estimated_height)
         img = Image.new('RGBA', (img_width, img_height), (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
         
-        # Load font
-        try:
-            font = ImageFont.truetype(typo['font_family'], int(font_size))
-        except:
-            font = ImageFont.load_default()
+        # Calculate maximum allowed width (screen width minus safe margins and padding)
+        safe_margin = 50  # Safe margin on each side
+        padding = effects.get('background_padding', {'x': 120, 'y': 50})
+        pad_x = padding.get('x', padding) if isinstance(padding, dict) else padding
+        outline_width = effects.get('outline_width', 3) if effects.get('text_has_outline', False) else 0
+        
+        # Maximum width for the background box
+        max_background_width = img_width - (safe_margin * 2)
+        # Maximum width for the text itself (accounting for padding and outline)
+        max_text_width = max_background_width - (pad_x * 2) - (outline_width * 4)
+        
+        # Start with the requested font size
+        current_font_size = int(font_size)
+        font = None
+        text_fits = False
+        
+        # Try progressively smaller font sizes until the text fits
+        while current_font_size > 20 and not text_fits:
+            try:
+                font = ImageFont.truetype(typo['font_family'], current_font_size)
+            except:
+                font = ImageFont.load_default()
+            
+            # Measure text with current font size
+            bbox = draw.textbbox((0, 0), text, font=font)
+            text_width = bbox[2] - bbox[0]
+            
+            # Check if text fits within maximum allowed width
+            if text_width <= max_text_width:
+                text_fits = True
+            else:
+                # Reduce font size by 5%
+                current_font_size = int(current_font_size * 0.95)
+        
+        # Update font_size to the final scaled size
+        if current_font_size < font_size:
+            print(f"[Background Style] Scaled font from {font_size}px to {current_font_size}px for text: '{text}'")
+        
+        # Calculate scaling factor for padding
+        original_font_size = typo.get('font_size', 140)  # Get original font size from config
+        scale_factor = current_font_size / original_font_size
+        
+        font_size = current_font_size
         
         # Split text into lines if needed
         lines = text.split('\n') if '\n' in text else [text]
@@ -125,10 +166,20 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
         total_height = 0
         max_width = 0
         
+        # Check if we need to account for outline
+        has_outline = effects.get('text_has_outline', False)
+        outline_width = effects.get('outline_width', 3) if has_outline else 0
+        
         for line in lines:
             bbox = draw.textbbox((0, 0), line, font=font)
             line_width = bbox[2] - bbox[0]
             line_height = bbox[3] - bbox[1]
+            
+            # Add extra space for outline on all sides, plus safety margin
+            if has_outline:
+                line_width += outline_width * 4  # Double the outline space for safety
+                line_height += outline_width * 4
+            
             line_bboxes.append((line_width, line_height))
             max_width = max(max_width, line_width)
             total_height += line_height
@@ -137,14 +188,18 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
         line_spacing = int(font_size * (typo.get('line_height', 1.1) - 1))
         total_height += line_spacing * (len(lines) - 1)
         
-        # Get padding
+        # Get padding and apply scaling
         padding = effects.get('background_padding', {'x': 20, 'y': 10})
         pad_x = padding.get('x', padding) if isinstance(padding, dict) else padding
         pad_y = padding.get('y', padding) if isinstance(padding, dict) else padding
         
-        # Calculate background dimensions
-        bg_width = max_width + (pad_x * 2)
-        bg_height = total_height + (pad_y * 2)
+        # Apply scaling factor to padding
+        scaled_pad_x = int(pad_x * scale_factor)
+        scaled_pad_y = int(pad_y * scale_factor)
+        
+        # Calculate background dimensions with scaled padding
+        bg_width = max_width + (scaled_pad_x * 2)
+        bg_height = total_height + (scaled_pad_y * 2)
         
         # Center background
         bg_x = (img_width - bg_width) // 2
@@ -154,10 +209,13 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
         opacity = int(255 * effects.get('background_opacity', 1.0))
         corners = effects.get('rounded_corners', 0)
         
-        if corners > 0:
+        # Scale rounded corners proportionally with font size
+        scaled_corners = int(corners * scale_factor) if corners > 0 else 0
+        
+        if scaled_corners > 0:
             draw.rounded_rectangle(
                 [(bg_x, bg_y), (bg_x + bg_width, bg_y + bg_height)],
-                radius=corners,
+                radius=scaled_corners,
                 fill=(*bg_color, opacity)
             )
         else:
@@ -167,7 +225,7 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
             )
         
         # Draw text
-        current_y = bg_y + pad_y
+        current_y = bg_y + scaled_pad_y
         # Handle both new format (text) and old format (normal)
         if 'text' in typo['colors']:
             text_color = tuple(typo['colors']['text'])
@@ -176,9 +234,31 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
         else:
             text_color = (255, 255, 255)
         
+        # Re-check outline settings for drawing
+        has_outline = effects.get('text_has_outline', False)
+        outline_width = effects.get('outline_width', 3) if has_outline else 0
+        
         for line, (line_width, line_height) in zip(lines, line_bboxes):
-            text_x = (img_width - line_width) // 2
-            draw.text((text_x, current_y), line, font=font, fill=(*text_color, 255))
+            # Calculate actual text width without outline padding for centering
+            actual_bbox = draw.textbbox((0, 0), line, font=font)
+            actual_text_width = actual_bbox[2] - actual_bbox[0]
+            text_x = (img_width - actual_text_width) // 2
+            
+            # Adjust y position to account for outline (using actual calculated position)
+            adjusted_y = current_y
+            
+            if has_outline:
+                # Get outline color
+                outline_color = tuple(typo['colors'].get('outline', [0, 0, 0]))
+                # Draw text with outline
+                draw.text((text_x, adjusted_y), line, font=font, 
+                         fill=(*text_color, 255),
+                         stroke_width=outline_width,
+                         stroke_fill=(*outline_color, 255))
+            else:
+                # Draw text without outline
+                draw.text((text_x, adjusted_y), line, font=font, fill=(*text_color, 255))
+            
             current_y += line_height + line_spacing
         
         return np.array(img)
@@ -299,6 +379,14 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
         normal_text_color = tuple(typo['colors']['text_normal'])
         highlighted_text_color = tuple(typo['colors']['text_highlighted'])
         
+        # Get separate opacity values for normal and highlighted text
+        normal_opacity_1 = shadow_config.get('normalOpacity', 0.8)
+        highlighted_opacity_1 = shadow_config.get('highlightedOpacity', normal_opacity_1 * 1.2)  # 20% more
+        
+        extra_shadow = shadow_config.get('extraShadows', [{}])[0]
+        normal_opacity_2 = extra_shadow.get('normalOpacity', 0.6)
+        highlighted_opacity_2 = extra_shadow.get('highlightedOpacity', normal_opacity_2 * 1.2)  # 20% more
+        
         # Use the enhanced text shadow effect
         return TextEffects.create_text_shadow_glow_effect(
             words=words,
@@ -307,9 +395,11 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
             normal_text_color=normal_text_color,
             highlighted_text_color=highlighted_text_color,
             shadow_blur_1=shadow_config.get('shadowBlur', 18),
-            shadow_opacity_1=0.8,  # from rgba(currentColor, 0.8)
-            shadow_blur_2=shadow_config.get('extraShadows', [{}])[0].get('blur', 27),
-            shadow_opacity_2=0.6,  # from rgba(currentColor, 0.6)
+            shadow_opacity_1=normal_opacity_1,
+            shadow_opacity_1_highlighted=highlighted_opacity_1,
+            shadow_blur_2=extra_shadow.get('blur', 27),
+            shadow_opacity_2=normal_opacity_2,
+            shadow_opacity_2_highlighted=highlighted_opacity_2,
             highlighted_word_index=word_index if word_index >= 0 else -1,
             image_size=(1080, 200)
         )

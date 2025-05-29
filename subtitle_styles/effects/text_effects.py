@@ -210,8 +210,10 @@ class TextEffects:
                                       highlighted_text_color: Tuple[int, int, int],
                                       shadow_blur_1: int = 8,
                                       shadow_opacity_1: float = 0.6,
+                                      shadow_opacity_1_highlighted: float = None,
                                       shadow_blur_2: int = 12,
                                       shadow_opacity_2: float = 0.5,
+                                      shadow_opacity_2_highlighted: float = None,
                                       highlighted_word_index: int = -1,
                                       image_size: Tuple[int, int] = (1080, 1920)) -> np.ndarray:
         """
@@ -255,10 +257,16 @@ class TextEffects:
             word_bbox = draw.textbbox((0, 0), word, font=font)
             word_width = word_bbox[2] - word_bbox[0]
             
-            # Create shadow layer 1 (blur 8, opacity 0.6)
+            # Choose opacity based on whether this word is highlighted
+            current_shadow_opacity_1 = (shadow_opacity_1_highlighted if shadow_opacity_1_highlighted is not None 
+                                       else shadow_opacity_1 * 1.2) if is_highlighted else shadow_opacity_1
+            current_shadow_opacity_2 = (shadow_opacity_2_highlighted if shadow_opacity_2_highlighted is not None 
+                                       else shadow_opacity_2 * 1.2) if is_highlighted else shadow_opacity_2
+            
+            # Create shadow layer 1 with appropriate opacity
             shadow_1_img = Image.new('RGBA', img.size, (0, 0, 0, 0))
             shadow_1_draw = ImageDraw.Draw(shadow_1_img)
-            shadow_1_opacity = int(255 * shadow_opacity_1)
+            shadow_1_opacity = int(255 * current_shadow_opacity_1)
             shadow_1_color = (*current_color, shadow_1_opacity)
             
             # Draw shadow 1 with good expansion for visibility (70% level)
@@ -273,10 +281,10 @@ class TextEffects:
             # Apply stronger blur to shadow 1
             shadow_1_img = shadow_1_img.filter(ImageFilter.GaussianBlur(radius=shadow_blur_1//2))
             
-            # Create shadow layer 2 (blur 12, opacity 0.5)
+            # Create shadow layer 2 with appropriate opacity
             shadow_2_img = Image.new('RGBA', img.size, (0, 0, 0, 0))
             shadow_2_draw = ImageDraw.Draw(shadow_2_img)
-            shadow_2_opacity = int(255 * shadow_opacity_2)
+            shadow_2_opacity = int(255 * current_shadow_opacity_2)
             
             # Draw shadow 2 with good expansion for soft glow (70% level)
             for offset in range(1, shadow_blur_2//2 + 1):

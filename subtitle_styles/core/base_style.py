@@ -68,10 +68,10 @@ class BaseSubtitleStyle(ABC):
         """Calculate position respecting Instagram safe zones"""
         width, height = resolution
         
-        # Instagram safe zones (increased side margins for better visibility)
+        # Instagram safe zones (adjusted for larger text)
         safe_top = 220 if safe_zones else 50
         safe_bottom = 450 if safe_zones else 50
-        safe_sides = 100 if safe_zones else 50  # Increased from 35 to 100
+        safe_sides = 50 if safe_zones else 30  # Reduced to allow more width for text
         
         x = width // 2  # Center horizontally by default
         

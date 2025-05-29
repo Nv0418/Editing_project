@@ -39,9 +39,9 @@ def create_json_styled_video(style_name='simple_caption', json_file=None, output
     audio_file = project_root / "other_root_files" / "got_script.mp3"
     transcription_file = project_root / "other_root_files" / "parakeet_output.json"
     
-    # Default JSON style file
+    # Default JSON style file - use v3 (latest) by default
     if json_file is None:
-        json_file = project_root / "subtitle_styles" / "config" / "subtitle_styles_v2.json"
+        json_file = project_root / "subtitle_styles" / "config" / "subtitle_styles_v3.json"
     else:
         json_file = Path(json_file)
     
