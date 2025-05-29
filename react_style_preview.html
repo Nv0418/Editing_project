@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VinVideo Style Preview - Live Interface</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f7;
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .left-panel {
+            width: 60%;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f5f5f7;
+        }
+
+        .right-panel {
+            width: 40%;
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .styles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .style-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            text-align: center;
+        }
+
+        .style-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .style-card.active {
+            border-color: #007AFF;
+            background: #f8f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+        }
+
+        .style-preview-mini {
+            height: 50px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .style-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 3px;
+        }
+
+        .style-type {
+            font-size: 0.75rem;
+            color: #666;
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .preview-container {
+            flex: 1;
+            position: relative;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .preview-screen {
+            width: 300px;
+            height: 533px;
+            background: #000;
+            border-radius: 20px;
+            position: relative;
+            border: 3px solid #333;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 80px;
+        }
+
+        .subtitle-display {
+            text-align: center;
+            max-width: 260px;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
+        }
+
+        .preview-controls {
+            padding: 20px;
+            background: #2a2a2a;
+            border-top: 1px solid #444;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 6px;
+            background: #1a1a1a;
+            color: white;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #007AFF;
+        }
+
+        .control-label {
+            color: #ccc;
+            font-size: 12px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        /* Style-specific classes for live preview - Updated to match actual rendering */
+        .simple-caption {
+            color: white;
+            font-size: 18px;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-family: 'Arial Black', Arial, sans-serif;
+            -webkit-text-stroke: 2px black;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .background-caption {
+            background: #00FFFF;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            font-size: 16px;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-family: 'Arial Black', Arial, sans-serif;
+            display: inline-block;
+        }
+
+        .glow-caption {
+            color: white;
+            font-size: 18px;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-family: 'Arial Black', Arial, sans-serif;
+            text-shadow: 0 0 20px #FF1493, 0 0 30px #FF1493, 0 0 40px #FF1493;
+            animation: glowPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glowPulse {
+            from { text-shadow: 0 0 20px #FF1493, 0 0 30px #FF1493, 0 0 40px #FF1493; }
+            to { text-shadow: 0 0 10px #FF1493, 0 0 20px #FF1493, 0 0 30px #FF1493; }
+        }
+
+        .highlight-caption {
+            background: linear-gradient(135deg, #8A2BE2, #9400D3);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: 'Arial Black', Arial, sans-serif;
+            display: inline-block;
+            text-transform: lowercase;
+        }
+
+        .dashing-caption {
+            color: #FF8C00;
+            font-size: 18px;
+            text-transform: lowercase;
+            font-weight: bold;
+            font-family: 'Arial Black', Arial, sans-serif;
+            text-shadow: 0 0 15px #FF8C00, 0 0 25px #FF8C00, 0 0 35px #FF8C00;
+            animation: dashingGlow 1.6s ease-in-out infinite alternate;
+        }
+
+        @keyframes dashingGlow {
+            from { text-shadow: 0 0 15px #FF8C00, 0 0 25px #FF8C00, 0 0 35px #FF8C00; }
+            to { text-shadow: 0 0 10px #FF8C00, 0 0 20px #FF8C00, 0 0 30px #FF8C00; }
+        }
+
+        .newscore {
+            color: #FFFF00;
+            font-size: 18px;
+            text-transform: lowercase;
+            font-weight: bold;
+            font-family: 'Arial Black', Arial, sans-serif;
+            -webkit-text-stroke: 2px black;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .popling-caption {
+            color: #FF69B4;
+            font-size: 17px;
+            text-transform: lowercase;
+            font-weight: bold;
+            font-family: 'Arial Black', Arial, sans-serif;
+            text-shadow: 0 0 20px #FF00FF, 0 0 30px #FF00FF, 0 0 40px #FF00FF;
+        }
+
+        .whistle-caption {
+            background: linear-gradient(135deg, #008080, #00FF7F);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-family: 'Arial Black', Arial, sans-serif;
+            display: inline-block;
+        }
+
+        .karaoke-caption {
+            color: white;
+            font-size: 18px;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-family: 'Arial Black', Arial, sans-serif;
+            -webkit-text-stroke: 2.5px #008000;
+            text-shadow: 2px 2px 4px #008000, 0 0 10px #00FF00;
+        }
+
+        .tilted-caption {
+            color: #FFA500;
+            font-size: 18px;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-family: 'Arial Black', Arial, sans-serif;
+            text-shadow: 0 0 15px #FF8C00, 0 0 25px #FF8C00;
+            transform: rotate(-5deg);
+        }
+
+        .preview-header {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #ccc;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .word-highlight {
+            display: inline;
+            position: relative;
+        }
+
+        .word-highlight.active {
+            animation: wordPulse 0.3s ease;
+        }
+
+        @keyframes wordPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Mini preview styles - Updated to match actual rendering */
+        .mini-simple { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; }
+        .mini-background { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; font-weight: bold; }
+        .mini-glow { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; font-weight: bold; }
+        .mini-highlight { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #8A2BE2; font-weight: bold; }
+        .mini-dashing { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); color: #FF8C00; font-weight: bold; }
+        .mini-newscore { background: linear-gradient(135deg, #fdbb2d 0%, #22c1c3 100%); color: #FFFF00; font-weight: bold; }
+        .mini-popling { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #FF69B4; font-weight: bold; }
+        .mini-whistle { background: linear-gradient(135deg, #a8e6cf 0%, #dcedc1 100%); color: white; font-weight: bold; }
+        .mini-karaoke { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); color: white; font-weight: bold; }
+        .mini-tilted { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: #FFA500; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const styles = [
+            { id: 'simple_caption', name: 'Simple Caption', type: 'Outline', class: 'simple-caption', mini: 'mini-simple' },
+            { id: 'background_caption', name: 'Background Caption', type: 'Background', class: 'background-caption', mini: 'mini-background' },
+            { id: 'glow_caption', name: 'Glow Caption', type: 'Glow', class: 'glow-caption', mini: 'mini-glow' },
+            { id: 'highlight_caption', name: 'Highlight Caption', type: 'Background', class: 'highlight-caption', mini: 'mini-highlight' },
+            { id: 'dashing_caption', name: 'Dashing Caption', type: 'Glow', class: 'dashing-caption', mini: 'mini-dashing' },
+            { id: 'newscore', name: 'Newscore', type: 'Outline', class: 'newscore', mini: 'mini-newscore' },
+            { id: 'popling_caption', name: 'Popling Caption', type: 'Glow', class: 'popling-caption', mini: 'mini-popling' },
+            { id: 'whistle_caption', name: 'Whistle Caption', type: 'Background', class: 'whistle-caption', mini: 'mini-whistle' },
+            { id: 'karaoke_caption', name: 'Karaoke Caption', type: 'Outline', class: 'karaoke-caption', mini: 'mini-karaoke' },
+            { id: 'tilted_caption', name: 'Tilted Caption', type: 'Glow', class: 'tilted-caption', mini: 'mini-tilted' }
+        ];
+
+        function StylePreviewApp() {
+            const [activeStyle, setActiveStyle] = useState(styles[0]);
+            const [previewText, setPreviewText] = useState('THIS IS A SAMPLE SUBTITLE');
+            const [highlightedWord, setHighlightedWord] = useState(0);
+
+            // Simulate word highlighting animation
+            useEffect(() => {
+                const words = previewText.split(' ');
+                const interval = setInterval(() => {
+                    setHighlightedWord(prev => (prev + 1) % words.length);
+                }, 800);
+                return () => clearInterval(interval);
+            }, [previewText]);
+
+            const renderSubtitle = () => {
+                const words = previewText.split(' ');
+                return (
+                    <div className={`subtitle-display ${activeStyle.class}`}>
+                        {words.map((word, index) => (
+                            <span 
+                                key={index}
+                                className={`word-highlight ${index === highlightedWord ? 'active' : ''}`}
+                            >
+                                {word}
+                                {index < words.length - 1 ? ' ' : ''}
+                            </span>
+                        ))}
+                    </div>
+                );
+            };
+
+            return (
+                <div className="app-container">
+                    <div className="left-panel">
+                        <div className="header">
+                            <h1>VinVideo Caption Style Selector</h1>
+                            <p>Choose a style and see live preview</p>
+                        </div>
+                        
+                        <div className="styles-grid">
+                            {styles.map((style) => (
+                                <div 
+                                    key={style.id}
+                                    className={`style-card ${activeStyle.id === style.id ? 'active' : ''}`}
+                                    onClick={() => setActiveStyle(style)}
+                                >
+                                    <div className={`style-preview-mini ${style.mini}`}>
+                                        {style.name.toUpperCase()}
+                                    </div>
+                                    <div className="style-name">{style.name}</div>
+                                    <div className="style-type">{style.type}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="right-panel">
+                        <div className="preview-header">
+                            Style & Caption Preview
+                        </div>
+                        
+                        <div className="preview-container">
+                            <div className="preview-screen">
+                                {renderSubtitle()}
+                            </div>
+                        </div>
+
+                        <div className="preview-controls">
+                            <label className="control-label">Preview Text</label>
+                            <input 
+                                type="text"
+                                className="text-input"
+                                value={previewText}
+                                onChange={(e) => setPreviewText(e.target.value.toUpperCase())}
+                                placeholder="Enter text to preview..."
+                            />
+                            <div style={{color: '#999', fontSize: '12px', marginTop: '10px'}}>
+                                Current Style: <strong style={{color: '#007AFF'}}>{activeStyle.name}</strong> ({activeStyle.type})
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<StylePreviewApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
