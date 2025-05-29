@@ -1,7 +1,0 @@
-# Ignore large media files
-media/VIDEOS_TEST/
-
-# Ignore other common files
-.DS_Store
-*.pyc
-__pycache__/
