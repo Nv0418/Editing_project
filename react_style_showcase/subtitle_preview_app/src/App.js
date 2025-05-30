@@ -1,12 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StyleGrid from './components/StyleGrid';
 import CanvasPreview from './components/CanvasPreview';
 import { styles } from './data/styles';
 
 function App() {
-  const [activeStyle, setActiveStyle] = useState(styles[0]);
-  const [previewText, setPreviewText] = useState('THIS IS A SAMPLE SUBTITLE');
+  // Initialize with localStorage or fallback to first style
+  const getInitialStyle = () => {
+    const savedStyleId = localStorage.getItem('vinvideo-selected-style');
+    if (savedStyleId) {
+      const savedStyle = styles.find(style => style.id === savedStyleId);
+      if (savedStyle) {
+        return savedStyle;
+      }
+    }
+    return styles[0];
+  };
+
+  const [activeStyle, setActiveStyle] = useState(getInitialStyle);
+  const [previewText, setPreviewText] = useState(() => {
+    return localStorage.getItem('vinvideo-preview-text') || 'THIS IS A SAMPLE SUBTITLE';
+  });
   const [hoveredStyle, setHoveredStyle] = useState(null);
+
+  // Save to localStorage whenever activeStyle changes
+  useEffect(() => {
+    localStorage.setItem('vinvideo-selected-style', activeStyle.id);
+  }, [activeStyle]);
+
+  // Save to localStorage whenever previewText changes
+  useEffect(() => {
+    localStorage.setItem('vinvideo-preview-text', previewText);
+  }, [previewText]);
 
   return (
     <div className="app-container">

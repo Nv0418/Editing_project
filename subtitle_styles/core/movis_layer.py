@@ -115,6 +115,8 @@ class StyledSubtitleLayer:
                 return self._render_dual_glow_style(canvas, active_window, current_word_idx, time)
             elif effect_type == 'text_shadow':
                 return self._render_text_shadow_style(canvas, active_window, current_word_idx, time)
+            elif effect_type == 'word_highlight':
+                return self._render_word_highlight_style(canvas, active_window, current_word_idx, time)
             else:
                 return self._render_simple_style(canvas, active_window, current_word_idx, time)
         else:
@@ -262,8 +264,73 @@ class StyledSubtitleLayer:
         # Check if text exceeds safe width and resize if needed
         if text_img.shape[1] > self.safe_width:
             scale_factor = self.safe_width / text_img.shape[1]
+            # Add some padding to ensure text doesn't touch edges
+            scale_factor *= 0.95  # Use 95% of available width for safety
             new_width = int(text_img.shape[1] * scale_factor)
             new_height = int(text_img.shape[0] * scale_factor)
+            
+            # Uncomment for debugging: print(f"Auto-scaling karaoke text: {text_img.shape[1]}px -> {new_width}px (factor: {scale_factor:.2f})")
+            
+            from PIL import Image
+            img_pil = Image.fromarray(text_img)
+            img_pil = img_pil.resize((new_width, new_height), Image.Resampling.LANCZOS)
+            text_img = np.array(img_pil)
+        
+        return self._composite_center(canvas, text_img)
+    
+    def _render_word_highlight_style(self, canvas, window, highlight_idx, time):
+        """Render word-by-word background highlighting style (like highlight caption)"""
+        from subtitle_styles.effects.word_highlight_effects import WordHighlightEffects
+        
+        text = window['text']
+        words = text.split()
+        
+        # Get style configuration
+        typo = self.style.config['typography']
+        effects = self.style.config.get('effect_parameters', {})
+        
+        # Transform text if needed
+        if typo.get('text_transform') == 'uppercase':
+            words = [word.upper() for word in words]
+        
+        # Get colors
+        text_color = tuple(typo['colors']['text'])
+        normal_bg_color = typo['colors'].get('background')
+        highlight_bg_color = typo['colors'].get('background_highlighted', 
+                                                typo['colors'].get('background', [138, 43, 226]))
+        
+        # Get effect parameters
+        bg_padding = effects.get('background_padding', {'x': 20, 'y': 10})
+        if isinstance(bg_padding, dict):
+            padding_tuple = (bg_padding.get('x', 20), bg_padding.get('y', 10))
+        else:
+            padding_tuple = (bg_padding, bg_padding // 2)
+        
+        corner_radius = effects.get('rounded_corners', 15)
+        
+        # Create word highlight effect
+        text_img = WordHighlightEffects.create_word_background_highlight_effect(
+            words=words,
+            font_path=typo['font_family'],
+            font_size=int(typo['font_size']),
+            text_color=text_color,
+            normal_bg_color=normal_bg_color,
+            highlight_bg_color=highlight_bg_color,
+            highlighted_word_index=highlight_idx if highlight_idx is not None else -1,
+            background_padding=padding_tuple,
+            corner_radius=corner_radius,
+            image_size=(1080, 200)
+        )
+        
+        # Check if text exceeds safe width and resize if needed
+        if text_img.shape[1] > self.safe_width:
+            scale_factor = self.safe_width / text_img.shape[1]
+            # Add some padding to ensure text doesn't touch edges
+            scale_factor *= 0.95  # Use 95% of available width for safety
+            new_width = int(text_img.shape[1] * scale_factor)
+            new_height = int(text_img.shape[0] * scale_factor)
+            
+            # Uncomment for debugging: print(f"Auto-scaling word highlight text: {text_img.shape[1]}px -> {new_width}px (factor: {scale_factor:.2f})")
             
             from PIL import Image
             img_pil = Image.fromarray(text_img)

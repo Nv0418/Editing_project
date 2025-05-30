@@ -46,6 +46,8 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
             return self._create_dual_glow_text(text, font_size, time, is_highlighted, word_index)
         elif effect_type == 'text_shadow':
             return self._create_text_shadow_text(text, font_size, time, is_highlighted, word_index)
+        elif effect_type == 'word_highlight':
+            return self._create_word_highlight_text(text, font_size, time, is_highlighted, word_index)
         else:
             # Fallback to simple text
             return self._create_simple_text(text, font_size, is_highlighted)
@@ -344,7 +346,7 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
         highlighted_glow_intensity = effects.get('glow_intensity_highlighted', 0.6)
         
         # Determine which word is highlighted based on timing or word_index
-        highlighted_word_index = word_index if word_index >= 0 else -1
+        highlighted_word_index = word_index if word_index is not None and word_index >= 0 else -1
         
         # Use the new two-tone glow effect
         return TextEffects.create_two_tone_glow_effect(
@@ -400,7 +402,53 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
             shadow_blur_2=extra_shadow.get('blur', 27),
             shadow_opacity_2=normal_opacity_2,
             shadow_opacity_2_highlighted=highlighted_opacity_2,
-            highlighted_word_index=word_index if word_index >= 0 else -1,
+            highlighted_word_index=word_index if word_index is not None and word_index >= 0 else -1,
+            image_size=(1080, 200)
+        )
+    
+    def _create_word_highlight_text(self, text: str, font_size: int, time: float, is_highlighted: bool = False, word_index: int = -1) -> np.ndarray:
+        """Create text with word-by-word background highlighting"""
+        from subtitle_styles.effects.word_highlight_effects import WordHighlightEffects
+        
+        typo = self.config['typography']
+        effects = self.config.get('effect_parameters', {})
+        
+        # Transform text
+        if typo.get('text_transform') == 'uppercase':
+            text = text.upper()
+        
+        # Split text into words
+        words = text.split()
+        
+        # Get colors
+        text_color = tuple(typo['colors']['text'])
+        normal_bg_color = typo['colors'].get('background')
+        highlight_bg_color = typo['colors'].get('background_highlighted', 
+                                                typo['colors'].get('background', [138, 43, 226]))
+        
+        # Get effect parameters
+        bg_padding = effects.get('background_padding', {'x': 20, 'y': 10})
+        if isinstance(bg_padding, dict):
+            padding_tuple = (bg_padding.get('x', 20), bg_padding.get('y', 10))
+        else:
+            padding_tuple = (bg_padding, bg_padding // 2)
+        
+        corner_radius = effects.get('rounded_corners', 15)
+        
+        # Determine which word is highlighted based on timing or word_index
+        highlighted_word_index = word_index if word_index is not None and word_index >= 0 else -1
+        
+        # Use the word highlight effect
+        return WordHighlightEffects.create_word_background_highlight_effect(
+            words=words,
+            font_path=typo['font_family'],
+            font_size=int(font_size),
+            text_color=text_color,
+            normal_bg_color=normal_bg_color,
+            highlight_bg_color=highlight_bg_color,
+            highlighted_word_index=highlighted_word_index,
+            background_padding=padding_tuple,
+            corner_radius=corner_radius,
             image_size=(1080, 200)
         )
     

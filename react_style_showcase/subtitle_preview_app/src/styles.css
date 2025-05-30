@@ -1,3 +1,20 @@
+/* Font Face Declarations */
+@font-face {
+    font-family: 'Bicyclette Black';
+    src: url('/fonts/Bicyclette-Black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap; /* Show text immediately, swap when font loads */
+}
+
+@font-face {
+    font-family: 'Alverata Bold Italic';
+    src: url('/fonts/alverata-bold-italic.ttf') format('truetype');
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
 /* Reset and Base Styles */
 * {
     margin: 0;

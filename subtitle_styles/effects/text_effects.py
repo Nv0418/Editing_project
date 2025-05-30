@@ -121,6 +121,25 @@ class TextEffects:
         total_width = bbox[2] - bbox[0]
         total_height = bbox[3] - bbox[1]
         
+        # Auto-scale font if text is too wide (ensure 5% margins on each side)
+        max_text_width = width * 0.9  # Use 90% of canvas width
+        if total_width > max_text_width:
+            scale_factor = max_text_width / total_width
+            new_font_size = int(font_size * scale_factor)
+            
+            # Reload font with new size
+            try:
+                font = ImageFont.truetype(font_path, new_font_size)
+            except:
+                font = ImageFont.load_default()
+                
+            # Recalculate dimensions with new font
+            bbox = draw.textbbox((0, 0), full_text, font=font)
+            total_width = bbox[2] - bbox[0]
+            total_height = bbox[3] - bbox[1]
+            
+            # Uncomment for debugging: print(f"Auto-scaled font in text effects: {font_size}px -> {new_font_size}px (text width: {total_width}px)")
+        
         # Center the entire text block
         start_x = (width + padding*2 - total_width) // 2
         start_y = (height + padding*2 - total_height) // 2
