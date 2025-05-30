@@ -208,15 +208,24 @@ class WordHighlightEffects:
             total_width = bbox[2] - bbox[0]
             total_height = bbox[3] - bbox[1]
         
-        # Center the entire text block
+        # Get font metrics for proper vertical centering
+        ascent, descent = font.getmetrics()
+        text_height = ascent + descent
+        
+        # Center the entire text block horizontally
         start_x = (width + padding*2 - total_width) // 2
-        start_y = (height + padding*2 - total_height) // 2
+        
+        # Center the text vertically using font metrics for proper alignment
+        canvas_center_y = (height + padding*2) // 2
+        start_y = canvas_center_y - ascent // 2
         
         # Calculate background rectangle for entire text with padding
+        # Center the background around the actual text center
         bg_x = start_x - background_padding[0]
-        bg_y = start_y - background_padding[1]
+        bg_center_y = canvas_center_y
+        bg_y = bg_center_y - text_height//2 - background_padding[1]
         bg_width = total_width + (background_padding[0] * 2)
-        bg_height = total_height + (background_padding[1] * 2)
+        bg_height = text_height + (background_padding[1] * 2)
         
         # Draw grey background for entire text block
         if corner_radius > 0:
@@ -459,15 +468,24 @@ class WordHighlightEffects:
             total_width = bbox[2] - bbox[0]
             total_height = bbox[3] - bbox[1]
         
-        # Center the entire text block
+        # Get font metrics for proper vertical centering
+        ascent, descent = font.getmetrics()
+        text_height = ascent + descent
+        
+        # Center the entire text block horizontally
         start_x = (width + padding*2 - total_width) // 2
-        start_y = (height + padding*2 - total_height) // 2
+        
+        # Center the text vertically using font metrics for proper alignment
+        canvas_center_y = (height + padding*2) // 2
+        start_y = canvas_center_y - ascent // 2
         
         # Calculate background rectangle for entire text with padding
+        # Center the background around the actual text center
         bg_x = start_x - background_padding[0]
-        bg_y = start_y - background_padding[1]
+        bg_center_y = canvas_center_y
+        bg_y = bg_center_y - text_height//2 - background_padding[1]
         bg_width = total_width + (background_padding[0] * 2)
-        bg_height = total_height + (background_padding[1] * 2)
+        bg_height = text_height + (background_padding[1] * 2)
         
         # Draw grey background for entire text block
         if corner_radius > 0:

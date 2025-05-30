@@ -363,15 +363,15 @@
       "font_weight": "bold",
       "colors": {
         "active_text": [0, 0, 0],
-        "inactive_text": [100, 100, 100],
-        "background": [120, 120, 120],
+        "inactive_text": [80, 80, 80],
+        "background": [140, 140, 140],
         "line_height": 1.1
       }
     },
     "effect_parameters": {
       "background_padding": {
-        "x": 35,
-        "y": 25
+        "x": 15,
+        "y": 8
       },
       "corner_radius": 25
     },
