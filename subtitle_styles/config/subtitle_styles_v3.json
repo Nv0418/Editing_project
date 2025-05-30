@@ -233,7 +233,7 @@
     "name": "HORMOZI CAPTION",
     "description": "Alex Hormozi-style motivational content",
     "version": "3.0",
-    "effect_type": "background",
+    "effect_type": "word_highlight",
     "format": {
       "resolution": [1080, 1920],
       "aspect_ratio": "9:16",
@@ -248,35 +248,30 @@
         "bottom": 450
       },
       "words_per_window": 3,
-      "max_width": 800,
-      "multi_line": true
+      "max_width": 800
     },
     "typography": {
-      "font_family": "/Users/naman/Library/Fonts/Montserrat-Black.ttf",
+      "font_family": "/Users/naman/Library/Fonts/mazzard-m-bold.otf",
       "font_size": 80,
-      "font_size_highlighted": 90,
+      "font_size_highlighted": 80,
       "text_alignment": "center",
-      "text_transform": "uppercase",
-      "line_height": 1.1,
+      "text_transform": "none",
       "colors": {
         "text": [255, 255, 255],
-        "background": [247, 194, 4],
-        "background_highlighted": [247, 194, 4]
+        "highlight_bg_color": [126, 87, 194]
       }
     },
     "effect_parameters": {
       "background_padding": {
-        "x": 45,
-        "y": 25
+        "x": 15,
+        "y": 10
       },
-      "background_opacity": 0.95,
-      "rounded_corners": 8,
-      "highlight_brightness_boost": 25,
-      "gradient_effect": true
+      "corner_radius": 20,
+      "normal_bg_color": null
     },
     "animation": {
       "type": "word_highlight",
-      "highlight_method": "background_gradient",
+      "highlight_method": "background_per_word",
       "transition_duration": 0.2
     }
   },
@@ -336,11 +331,11 @@
   },
   
   
-  "newscore": {
-    "name": "NEWSCORE",
-    "description": "Breaking news & urgent updates style",
+  "deep_diver": {
+    "name": "DEEP DIVER",
+    "description": "Deep thoughts style with grey background and black active word",
     "version": "3.0",
-    "effect_type": "outline",
+    "effect_type": "deep_diver",
     "format": {
       "resolution": [1080, 1920],
       "aspect_ratio": "9:16",
@@ -355,29 +350,34 @@
         "bottom": 450
       },
       "words_per_window": 3,
-      "max_width": 880
+      "max_width": 850,
+      "multi_line": true,
+      "allow_dynamic_width": true
     },
     "typography": {
-      "font_family": "/Users/naman/Library/Fonts/Oswald-Bold.ttf",
-      "font_size": 68,
-      "font_size_highlighted": 76,
+      "font_family": "/Users/naman/Library/Fonts/PublicaSansRound-Bd.otf",
+      "font_size": 70,
+      "font_size_highlighted": 70,
       "text_alignment": "center",
-      "text_transform": "uppercase",
+      "text_transform": "lowercase",
       "font_weight": "bold",
       "colors": {
-        "text": [255, 215, 0],
-        "text_highlighted": [255, 255, 255],
-        "outline": [0, 0, 0],
-        "outline_highlighted": [255, 0, 0]
+        "active_text": [0, 0, 0],
+        "inactive_text": [100, 100, 100],
+        "background": [120, 120, 120],
+        "line_height": 1.1
       }
     },
     "effect_parameters": {
-      "outline_width": 4,
-      "highlight_brightness_boost": 20
+      "background_padding": {
+        "x": 35,
+        "y": 25
+      },
+      "corner_radius": 25
     },
     "animation": {
       "type": "word_highlight",
-      "highlight_method": "brightness_boost",
+      "highlight_method": "deep_diver",
       "transition_duration": 0.2
     }
   },

@@ -48,6 +48,8 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
             return self._create_text_shadow_text(text, font_size, time, is_highlighted, word_index)
         elif effect_type == 'word_highlight':
             return self._create_word_highlight_text(text, font_size, time, is_highlighted, word_index)
+        elif effect_type == 'deep_diver':
+            return self._create_deep_diver_text(text, font_size, time, is_highlighted, word_index)
         else:
             # Fallback to simple text
             return self._create_simple_text(text, font_size, is_highlighted)
@@ -446,6 +448,49 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
             text_color=text_color,
             normal_bg_color=normal_bg_color,
             highlight_bg_color=highlight_bg_color,
+            highlighted_word_index=highlighted_word_index,
+            background_padding=padding_tuple,
+            corner_radius=corner_radius,
+            image_size=(1080, 200)
+        )
+    
+    def _create_deep_diver_text(self, text: str, font_size: int, time: float = 0, is_highlighted: bool = False, word_index: Optional[int] = None) -> np.ndarray:
+        """Create deep diver effect text"""
+        from subtitle_styles.effects.word_highlight_effects import WordHighlightEffects
+        typo = self.config['typography']
+        effects = self.config.get('effect_parameters', {})
+        
+        # Transform text
+        if typo.get('text_transform') == 'uppercase':
+            text = text.upper()
+        elif typo.get('text_transform') == 'lowercase':
+            text = text.lower()
+        
+        # Split into words for individual styling
+        words = text.split()
+        
+        # Get colors from config
+        colors = typo.get('colors', {})
+        active_text_color = colors.get('active_text', [0, 0, 0])  # Black for active
+        inactive_text_color = colors.get('inactive_text', [128, 128, 128])  # Grey for inactive
+        background_color = colors.get('background', [192, 192, 192])  # Light grey background
+        
+        # Get padding and corner radius
+        padding = effects.get('background_padding', {'x': 40, 'y': 15})
+        padding_tuple = (padding['x'], padding['y']) if isinstance(padding, dict) else padding
+        corner_radius = effects.get('corner_radius', 25)
+        
+        # Determine which word is highlighted
+        highlighted_word_index = word_index if word_index is not None and word_index >= 0 else -1
+        
+        # Use the deep diver effect
+        return WordHighlightEffects.create_deep_diver_effect(
+            words=words,
+            font_path=typo['font_family'],
+            font_size=int(font_size),
+            active_text_color=active_text_color,
+            inactive_text_color=inactive_text_color,
+            background_color=background_color,
             highlighted_word_index=highlighted_word_index,
             background_padding=padding_tuple,
             corner_radius=corner_radius,

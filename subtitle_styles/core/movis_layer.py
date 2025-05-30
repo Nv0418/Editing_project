@@ -117,6 +117,8 @@ class StyledSubtitleLayer:
                 return self._render_text_shadow_style(canvas, active_window, current_word_idx, time)
             elif effect_type == 'word_highlight':
                 return self._render_word_highlight_style(canvas, active_window, current_word_idx, time)
+            elif effect_type == 'deep_diver':
+                return self._render_deep_diver_style(canvas, active_window, current_word_idx, time)
             else:
                 return self._render_simple_style(canvas, active_window, current_word_idx, time)
         else:
@@ -374,6 +376,54 @@ class StyledSubtitleLayer:
         
         return self._composite_center(canvas, text_img)
     
+    def _render_deep_diver_style(self, canvas, window, highlight_idx, time):
+        """Render deep diver style with full background and word color changes"""
+        from subtitle_styles.effects.word_highlight_effects import WordHighlightEffects
+        
+        # Get the words from window
+        words = [w['word'] for w in window['words']]
+        
+        # Get style configuration
+        typo = self.style.config['typography']
+        effects = self.style.config.get('effect_parameters', {})
+        
+        # Transform text if needed
+        if typo.get('text_transform') == 'uppercase':
+            words = [word.upper() for word in words]
+        elif typo.get('text_transform') == 'lowercase':
+            words = [word.lower() for word in words]
+        
+        # Get colors for deep diver
+        active_text_color = tuple(typo['colors'].get('active_text', [0, 0, 0]))
+        inactive_text_color = tuple(typo['colors'].get('inactive_text', [128, 128, 128]))
+        background_color = tuple(typo['colors'].get('background', [192, 192, 192]))
+        
+        # Get effect parameters
+        bg_padding = effects.get('background_padding', {'x': 25, 'y': 10})
+        if isinstance(bg_padding, dict):
+            padding_tuple = (bg_padding.get('x', 25), bg_padding.get('y', 10))
+        else:
+            padding_tuple = (bg_padding, bg_padding // 2)
+        
+        corner_radius = effects.get('corner_radius', 20)
+        
+        # Create deep diver effect
+        text_img = WordHighlightEffects.create_deep_diver_effect(
+            words=words,
+            font_path=typo['font_family'],
+            font_size=int(typo['font_size']),
+            active_text_color=active_text_color,
+            inactive_text_color=inactive_text_color,
+            background_color=background_color,
+            highlighted_word_index=highlight_idx if highlight_idx is not None else -1,
+            background_padding=padding_tuple,
+            corner_radius=corner_radius,
+            image_size=(1080, 200)
+        )
+        
+        # Composite onto canvas
+        return self._composite_center(canvas, text_img)
+    
     def _composite_center(self, canvas, text_img):
         """Composite text image onto canvas at designated position"""
         if text_img.shape[0] > canvas.shape[0] or text_img.shape[1] > canvas.shape[1]:
@@ -395,8 +445,14 @@ class StyledSubtitleLayer:
         y = max(0, min(y, canvas_h - text_h))
         
         # Composite
-        x_end = x + text_w
-        y_end = y + text_h
+        x_end = min(x + text_w, canvas_w)
+        y_end = min(y + text_h, canvas_h)
+        
+        # Adjust text image if it needs to be cropped
+        text_w_actual = x_end - x
+        text_h_actual = y_end - y
+        if text_w_actual < text_w or text_h_actual < text_h:
+            text_img = text_img[:text_h_actual, :text_w_actual]
         
         # Alpha blend
         alpha = text_img[..., 3:4] / 255.0
