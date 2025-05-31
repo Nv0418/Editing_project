@@ -1,0 +1,73 @@
+{
+  "composition": {
+    "resolution": [1080, 1920],
+    "duration": 30.0,
+    "fps": 30,
+    "background_color": [0, 0, 0]
+  },
+  "layers": [
+    {
+      "type": "video",
+      "source": "media/sample_video.mp4",
+      "name": "main_video",
+      "position": [540, 960],
+      "scale": 1.0,
+      "opacity": 1.0,
+      "start_time": 0.0,
+      "duration": 30.0,
+      "animations": {
+        "opacity": {
+          "keyframes": [0.0, 2.0, 28.0, 30.0],
+          "values": [0.0, 1.0, 1.0, 0.0],
+          "easings": ["ease_out", "linear", "ease_in"]
+        }
+      }
+    },
+    {
+      "type": "video",
+      "source": "media/overlay.mp4",
+      "name": "picture_in_picture",
+      "position": [900, 200],
+      "scale": 0.3,
+      "opacity": 0.8,
+      "start_time": 10.0,
+      "duration": 10.0,
+      "animations": {
+        "position": {
+          "keyframes": [0.0, 5.0, 10.0],
+          "values": [[900, 200], [900, 400], [900, 200]],
+          "easings": ["ease_in_out", "ease_in_out"]
+        }
+      },
+      "effects": ["shadow"]
+    }
+  ],
+  "audio": {
+    "background_music": {
+      "source": "media/background_music.mp3",
+      "level": -20.0,
+      "fade_in": 3.0,
+      "fade_out": 3.0,
+      "ducking": {
+        "trigger": "voice",
+        "reduction": -10.0
+      }
+    },
+    "narration": {
+      "source": "other_root_files/got_script.mp3",
+      "offset": 5.0,
+      "level": 0.0
+    }
+  },
+  "subtitles": {
+    "parakeet_data": "other_root_files/parakeet_output.json",
+    "style": "highlight_caption",
+    "position": "bottom",
+    "effects": ["glow"],
+    "animation": "fade_in"
+  },
+  "export": {
+    "platform": "instagram",
+    "quality": "high"
+  }
+}

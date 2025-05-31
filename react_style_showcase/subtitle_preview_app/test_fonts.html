@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Font Loading Test</title>
+    <link rel="stylesheet" href="src/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .font-test {
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .sample {
+            font-size: 48px;
+            margin: 10px 0;
+            color: #333;
+        }
+        .status {
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .loaded { color: green; }
+        .failed { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Font Loading Test for VinVideo React App</h1>
+    
+    <div class="font-test">
+        <h3>1. Simple Caption - Oswald Heavy</h3>
+        <div class="sample" style="font-family: 'Oswald Heavy', sans-serif; font-weight: 900;">
+            THIS IS A SAMPLE SUBTITLE
+        </div>
+        <div class="status" id="status-oswald">Checking...</div>
+    </div>
+
+    <div class="font-test">
+        <h3>2. Background Caption - Bicyclette Black</h3>
+        <div class="sample" style="font-family: 'Bicyclette Black', sans-serif; font-weight: 900;">
+            THIS IS A SAMPLE SUBTITLE
+        </div>
+        <div class="status" id="status-bicyclette">Checking...</div>
+    </div>
+
+    <div class="font-test">
+        <h3>3. Glow Caption - Impact</h3>
+        <div class="sample" style="font-family: 'Impact', sans-serif; font-weight: bold;">
+            THIS IS A SAMPLE SUBTITLE
+        </div>
+        <div class="status" id="status-impact">Checking...</div>
+    </div>
+
+    <div class="font-test">
+        <h3>4. Karaoke Style - Alverata Bold Italic</h3>
+        <div class="sample" style="font-family: 'Alverata Bold Italic', serif; font-weight: 800; font-style: italic;">
+            THIS IS A SAMPLE SUBTITLE
+        </div>
+        <div class="status" id="status-alverata">Checking...</div>
+    </div>
+
+    <div class="font-test">
+        <h3>5. Highlight Caption - Mazzard M Bold</h3>
+        <div class="sample" style="font-family: 'Mazzard M Bold', sans-serif; font-weight: bold;">
+            THIS IS A SAMPLE SUBTITLE
+        </div>
+        <div class="status" id="status-mazzard">Checking...</div>
+    </div>
+
+    <div class="font-test">
+        <h3>6. Deep Diver - Publica Sans Round Bold</h3>
+        <div class="sample" style="font-family: 'Publica Sans Round Bold', sans-serif; font-weight: bold;">
+            this is a sample subtitle
+        </div>
+        <div class="status" id="status-publica">Checking...</div>
+    </div>
+
+    <div class="font-test">
+        <h3>7. Popling Caption - Bicyclette Black</h3>
+        <div class="sample" style="font-family: 'Bicyclette Black', sans-serif; font-weight: 900;">
+            this is a sample subtitle
+        </div>
+        <div class="status" id="status-popling">Checking...</div>
+    </div>
+
+    <div class="font-test">
+        <h3>8. Green Goblin - Manrope ExtraBold</h3>
+        <div class="sample" style="font-family: 'Manrope ExtraBold', sans-serif; font-weight: 800;">
+            THIS IS A SAMPLE SUBTITLE
+        </div>
+        <div class="status" id="status-manrope">Checking...</div>
+    </div>
+
+    <div class="font-test">
+        <h3>9. Sgone Caption - The Sgone</h3>
+        <div class="sample" style="font-family: 'The Sgone', sans-serif; font-weight: normal;">
+            this is a sample subtitle
+        </div>
+        <div class="status" id="status-sgone">Checking...</div>
+    </div>
+
+    <script>
+        // Test font loading
+        const fontsToTest = [
+            { name: 'Oswald Heavy', id: 'oswald', weight: '900' },
+            { name: 'Bicyclette Black', id: 'bicyclette', weight: '900' },
+            { name: 'Impact', id: 'impact', weight: 'bold' },
+            { name: 'Alverata Bold Italic', id: 'alverata', weight: '800', style: 'italic' },
+            { name: 'Mazzard M Bold', id: 'mazzard', weight: 'bold' },
+            { name: 'Publica Sans Round Bold', id: 'publica', weight: 'bold' },
+            { name: 'Bicyclette Black', id: 'popling', weight: '900' },
+            { name: 'Manrope ExtraBold', id: 'manrope', weight: '800' },
+            { name: 'The Sgone', id: 'sgone', weight: 'normal' }
+        ];
+
+        document.fonts.ready.then(() => {
+            fontsToTest.forEach(font => {
+                const fontString = `${font.style || 'normal'} ${font.weight} 48px "${font.name}"`;
+                const isLoaded = document.fonts.check(fontString);
+                const status = document.getElementById(`status-${font.id}`);
+                
+                if (isLoaded) {
+                    status.textContent = '✅ Font loaded successfully';
+                    status.className = 'status loaded';
+                } else {
+                    status.textContent = '❌ Font failed to load';
+                    status.className = 'status failed';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
