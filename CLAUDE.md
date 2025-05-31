@@ -1,7 +1,12 @@
 # CLAUDE.md - VinVideo Project Context
 
 ## Project Overview
-VinVideo is an AI-powered video editing platform with a focus on subtitle styling and automated video generation. The project uses Movis (Python video editing library) as the core rendering engine.
+VinVideo is an AI-powered video creation platform that automates the entire short-form content production process (like YouTube Shorts, Reels, TikToks). Users can input a script or concept, and VinVideo uses multiple AI agents—like a Director, Producer, and DoP—to generate, edit, and stylize videos with minimal manual effort. The system integrates AI models for script understanding, image and video generation, scene planning, and smart editing decisions.
+
+The project uses Movis (Python video editing library) as the core rendering engine for video composition and effects.
+
+## Current Module: Subtitle Style Selection
+We are currently developing the subtitle style selection interface - one component of the larger VinVideo platform. This module allows users to choose from professional subtitle styles for their generated videos, presented in an Aicut-like interface.
 
 ## Current Development Focus
 🚧 **IN PROGRESS**: Comprehensive subtitle style system (6/11 professional styles completed)
@@ -89,7 +94,20 @@ python3 react_style_showcase/style_preview_generator.py
 
 # Quick development preview
 python3 quick_preview.py
+
+# Test Deep Diver style with centering fix
+python3 30may_test/generate_deep_diver_video.py
 ```
+
+## Known Issues and Fixes
+
+### Deep Diver Centering Fix (May 30, 2025)
+The Deep Diver caption style had a horizontal centering issue in 9:16 Instagram format where the gray background appeared shifted to the right. This has been fixed with a manual offset adjustment.
+
+**Fix Location**: `subtitle_styles/effects/word_highlight_effects_manual_fix.py`
+- Adjust `MANUAL_OFFSET = -40` value to fine-tune horizontal positioning
+- Negative values shift left, positive values shift right
+- Current setting shifts 40 pixels left to compensate for the rendering offset
 
 ## NEXT PRIORITY TASK
 **Complete Remaining 5 Subtitle Styles** (Phase 2 Continuation)
@@ -109,8 +127,17 @@ python3 quick_preview.py
 3. **FUTURE**: Real-time preview with audio synchronization
 4. **ADVANCED**: API integration and cloud deployment
 
+## Essential Documentation
+For complete understanding of the subtitle system, read these files in order:
+1. **CLAUDE.md** (this file) - Project overview and status
+2. **WORD_BY_WORD_EFFECTS_GUIDE.md** - Technical implementation details
+3. **VIDEO_GENERATION_GUIDE.md** - How to generate test videos
+4. **SUBTITLE_README.md** - Basic subtitle system overview
+5. **subtitle_styles/config/subtitle_styles_v3.json** - Style configurations
+
 ## Notes
 - All subtitle styles should be clearly visible and distinguishable
 - Preview interfaces must accurately represent final video output
 - Maintain backwards compatibility with existing JSON configurations
 - Focus on user experience matching professional tools like Aicut
+- Use VIDEO_GENERATION_GUIDE.md for consistent video testing

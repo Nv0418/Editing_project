@@ -119,7 +119,7 @@
       "max_width": 900
     },
     "typography": {
-      "font_family": "/Users/naman/Library/Fonts/alverata-bold-italic.ttf",
+      "font_family": "/Users/naman/Desktop/movie_py/subtitle_styles/fonts/Manrope-ExtraBold.ttf",
       "font_size": 108,
       "font_size_highlighted": 108,
       "text_alignment": "center",
@@ -385,9 +385,9 @@
   
   "popling_caption": {
     "name": "POPLING CAPTION",
-    "description": "Playful kids content with rainbow effects",
+    "description": "Clean text with playful purple underline highlight",
     "version": "3.0",
-    "effect_type": "glow",
+    "effect_type": "underline",
     "format": {
       "resolution": [1080, 1920],
       "aspect_ratio": "9:16",
@@ -405,30 +405,82 @@
       "max_width": 900
     },
     "typography": {
-      "font_family": "/Users/naman/Library/Fonts/Fredoka-Bold.ttf",
-      "font_size": 66,
-      "font_size_highlighted": 74,
+      "font_family": "/Users/naman/Library/Fonts/Bicyclette-Black.ttf",
+      "font_size": 100,
+      "font_size_highlighted": 100,
       "text_alignment": "center",
       "text_transform": "lowercase",
       "font_weight": "bold",
       "colors": {
-        "text": [255, 105, 180],
-        "text_highlighted": [255, 20, 147],
-        "glow": [255, 0, 255],
-        "glow_highlighted": [138, 43, 226]
+        "text": [255, 255, 255],
+        "outline": [0, 0, 0],
+        "underline": [147, 51, 234]
       }
     },
     "effect_parameters": {
-      "glow_radius": 18,
-      "glow_intensity": 0.85,
-      "glow_intensity_highlighted": 1.15,
-      "color_pop": true,
-      "multi_color_effect": true
+      "outline_width": 5,
+      "underline_height": 16,
+      "underline_offset": 10,
+      "underline_style": "hand_drawn",
+      "underline_opacity": 0.9
     },
     "animation": {
       "type": "word_highlight",
-      "highlight_method": "color_pop_glow",
+      "highlight_method": "underline",
       "transition_duration": 0.2
+    }
+  },
+  
+  "greengoblin": {
+    "name": "GREEN GOBLIN",
+    "description": "Clean text style without glow effects using karaoke font and effects",
+    "version": "3.0", 
+    "effect_type": "dual_glow",
+    "format": {
+      "resolution": [1080, 1920],
+      "aspect_ratio": "9:16",
+      "target_platform": ["Instagram", "YouTube Shorts", "TikTok"]
+    },
+    "layout": {
+      "text_positioning": "bottom",
+      "safe_zones": true,
+      "safe_margins": {
+        "horizontal": 100,
+        "top": 220,
+        "bottom": 450
+      },
+      "words_per_window": 3,
+      "max_width": 900
+    },
+    "typography": {
+      "font_family": "/Users/naman/Desktop/movie_py/subtitle_styles/fonts/Manrope-ExtraBold.ttf",
+      "font_size": 108,
+      "font_size_highlighted": 108,
+      "text_alignment": "center",
+      "text_transform": "uppercase",
+      "font_weight": "800",
+      "colors": {
+        "text_normal": [255, 255, 255],
+        "text_highlighted": [57, 255, 20],
+        "glow_normal": [255, 255, 255],
+        "glow_highlighted": [57, 255, 20]
+      }
+    },
+    "effect_parameters": {
+      "glow_radius_normal": 0,
+      "glow_radius_highlighted": 0,
+      "glow_intensity_normal": 0.0,
+      "glow_intensity_highlighted": 0.0,
+      "outline_width": 3,
+      "outline_color": [0, 0, 0],
+      "auto_scale": true,
+      "scale_factor_highlighted": 1.1
+    },
+    "animation": {
+      "type": "word_highlight",
+      "highlight_method": "dual_glow_with_scale",
+      "transition_duration": 0.2,
+      "word_level_styling": true
     }
   },
   
@@ -581,59 +633,46 @@
     }
   },
   
-  "Background_opacity_style_draft_1": {
-    "name": "Background Opacity Style Draft 1",
-    "description": "Simple text with semi-transparent background - for normal dialogue",
-    "version": "1.0",
-    "effect_type": "background",
+  "sgone_caption": {
+    "name": "SGONE CAPTION",
+    "description": "Middle positioned style using The Sgone font with 2 words max",
+    "version": "3.0",
+    "effect_type": "outline",
     "format": {
       "resolution": [1080, 1920],
       "aspect_ratio": "9:16",
       "target_platform": ["Instagram", "YouTube Shorts", "TikTok"]
     },
     "layout": {
-      "text_positioning": "lower_third",
-      "vertical_position": 1500,
-      "horizontal_positions": {
-        "left": 270,
-        "center": 540,
-        "right": 810
+      "text_positioning": "center",
+      "safe_zones": true,
+      "safe_margins": {
+        "horizontal": 100,
+        "top": 200,
+        "bottom": 200
       },
-      "words_per_window": 3,
-      "window_overlap": false
+      "words_per_window": 2,
+      "max_width": 600
     },
     "typography": {
-      "font_family": "Arial",
-      "font_size": 80,
-      "font_size_highlighted": 90,
+      "font_family": "/Users/naman/Desktop/movie_py/subtitle_styles/fonts/The Sgone.otf",
+      "font_size": 65,
+      "font_size_highlighted": 75,
       "text_alignment": "center",
+      "text_transform": "lowercase",
       "colors": {
-        "normal": [255, 255, 255],
-        "highlighted": [255, 255, 0],
-        "background": [0, 0, 0]
+        "text": [255, 255, 255],
+        "outline": [0, 0, 0]
       }
     },
     "effect_parameters": {
-      "background_padding": {
-        "x": 10,
-        "y": 10
-      },
-      "background_opacity": 0.7,
-      "rounded_corners": 5
+      "outline_width": 4,
+      "auto_scale": true
     },
     "animation": {
-      "type": "color_change",
-      "highlight_method": "color_and_size",
-      "duration_extend": 30.0,
-      "transition_type": "instant"
-    },
-    "background": {
-      "type": "text_boxes",
-      "color": [0, 0, 0],
-      "opacity": 0.7,
-      "padding": 10,
-      "rounded_corners": 5
-    },
-    "status": "planned"
+      "type": "word_highlight",
+      "highlight_method": "size_pulse",
+      "transition_duration": 0.2
+    }
   }
 }

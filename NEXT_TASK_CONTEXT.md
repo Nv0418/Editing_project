@@ -5,7 +5,7 @@
 ### ✅ COMPLETED ACHIEVEMENTS:
 
 #### 1. **Comprehensive Word-by-Word Subtitle System** - FULLY IMPLEMENTED
-- **6 Finalized Professional Styles** with unique effects and typography
+- **9 Finalized Professional Styles** with unique effects and typography
 - **Complete Documentation**: `WORD_BY_WORD_EFFECTS_GUIDE.md` with technical specifications
 - **Instagram 9:16 Optimization**: All styles perfect for social media (1080x1920)
 - **NVIDIA Parakeet Integration**: Real audio-synced word-level highlighting
@@ -13,7 +13,7 @@
 
 #### 2. **Advanced Effect Engine** - PRODUCTION READY
 - **Main Config**: `/Users/naman/Desktop/movie_py/subtitle_styles/config/subtitle_styles_v3.json` ✅
-- **StyleLoader**: `json_style_loader.py` with 6 effect type routing ✅  
+- **StyleLoader**: `json_style_loader.py` with 7 effect type routing ✅  
 - **Movis Integration**: `StyledSubtitleLayer` for seamless video composition ✅
 - **Effect Systems**: `text_effects.py` + `word_highlight_effects.py` ✅
 - **Testing Suite**: `test_v3_styles.py` for comprehensive validation ✅
@@ -25,8 +25,9 @@
 - **dual_glow**: Word color highlighting (Karaoke Style)
 - **word_highlight**: Per-word background boxes (Highlight Caption)
 - **deep_diver**: Contemplative style with contrasting text (Deep Diver)
+- **underline**: Hand-drawn style underline highlighting (Popling Caption)
 
-## 🏆 FINALIZED STYLES (6/6 COMPLETED - PRODUCTION READY):
+## 🏆 FINALIZED STYLES (9/9 COMPLETED - PRODUCTION READY):
 
 ### ✅ 1. **SIMPLE CAPTION** - PROFESSIONAL GRADE
 - **Font**: Oswald Heavy, 72px (80px highlighted)
@@ -70,6 +71,27 @@
 - **Use Case**: Philosophical, contemplative, educational content
 - **Status**: Perfect ✅
 
+### ✅ 7. **POPLING CAPTION** - PROFESSIONAL GRADE
+- **Font**: Bicyclette Black, 100px
+- **Colors**: White text, Black outline (5px), Purple underline
+- **Effect**: Hand-drawn style underline (16px thickness) appearing under highlighted words
+- **Use Case**: Playful, creative, artistic content
+- **Status**: Perfect ✅
+
+### ✅ 8. **GREEN GOBLIN** - PROFESSIONAL GRADE
+- **Font**: Manrope ExtraBold, 108px
+- **Colors**: White text → Bright Green highlight, Black outline (3px)
+- **Effect**: Clean karaoke-style word highlighting with auto-scaling (1.1x)
+- **Use Case**: Dynamic content without glow effects, professional presentations
+- **Status**: Perfect ✅
+
+### ✅ 9. **SGONE CAPTION** - PROFESSIONAL GRADE
+- **Font**: The Sgone, 65px (75px highlighted)
+- **Colors**: White text, Black outline (4px)
+- **Effect**: Center-positioned size-pulse animation with 2-word max display
+- **Use Case**: Artistic content with distinctive typography, unique branding
+- **Status**: Perfect ✅
+
 ## 🔄 CURRENT DEVELOPMENT WORKFLOW:
 
 ### VIDEO GENERATION TESTING
@@ -111,7 +133,7 @@ python3 react_style_showcase/style_preview_generator.py
 
 ## 🎯 SYSTEM ACHIEVEMENTS
 
-### ✅ All 6 Styles Meet Professional Standards:
+### ✅ All 9 Styles Meet Professional Standards:
 1. **Visually Distinct** - Each style has unique typography and effects
 2. **Professional Quality** - Production-ready for social media platforms
 3. **Readable** - Optimized text visibility and contrast
@@ -122,7 +144,7 @@ python3 react_style_showcase/style_preview_generator.py
 ## 🔧 TECHNICAL IMPLEMENTATION - PRODUCTION READY
 
 ### ✅ Completed Core Systems:
-- **Advanced Effect Engine**: 6 distinct effect types with professional rendering
+- **Advanced Effect Engine**: 7 distinct effect types with professional rendering
 - **Word-by-Word Sync**: NVIDIA Parakeet integration for precise audio timing
 - **Font Management**: System and custom font support with fallbacks
 - **Auto-scaling**: Intelligent font resizing for various text lengths
@@ -137,6 +159,7 @@ python3 react_style_showcase/style_preview_generator.py
 4. **Dual Glow**: Two-tone word highlighting for karaoke effects
 5. **Word Highlight**: Individual word background highlighting (Hormozi style)
 6. **Deep Diver**: Contrasting active/inactive text with shared backgrounds
+7. **Underline Effects**: Hand-drawn style underlines with wave animation
 
 ## 🚀 NEXT DEVELOPMENT PHASES
 
@@ -159,7 +182,7 @@ python3 react_style_showcase/style_preview_generator.py
 
 ## 📈 PROJECT STATUS SUMMARY
 
-**✅ COMPLETED**: Professional-grade word-by-word subtitle system with 6 finalized styles
+**✅ COMPLETED**: Professional-grade word-by-word subtitle system with 9 finalized styles
 **🎯 CURRENT STATE**: Production-ready for social media content creation
 **🚀 NEXT GOALS**: Advanced features, scaling, and platform integration
 

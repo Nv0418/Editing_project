@@ -49,351 +49,82 @@ class WordHighlightEffects:
         except:
             font = ImageFont.load_default()
         
-        # Calculate text layout - all words in one line
-        full_text = ' '.join(words)
+        # Split text and calculate positions
         draw = ImageDraw.Draw(img)
-        bbox = draw.textbbox((0, 0), full_text, font=font)
-        total_width = bbox[2] - bbox[0]
-        total_height = bbox[3] - bbox[1]
-        
-        # Auto-scale font if text is too wide (ensure 5% margins on each side)
-        max_text_width = width * 0.9  # Use 90% of canvas width
-        if total_width > max_text_width:
-            scale_factor = max_text_width / total_width
-            new_font_size = int(font_size * scale_factor)
-            
-            # Reload font with new size
-            try:
-                font = ImageFont.truetype(font_path, new_font_size)
-            except:
-                font = ImageFont.load_default()
-                
-            # Recalculate dimensions with new font
-            bbox = draw.textbbox((0, 0), full_text, font=font)
-            total_width = bbox[2] - bbox[0]
-            total_height = bbox[3] - bbox[1]
-            
-            # Uncomment for debugging: print(f"Auto-scaled font in word highlight: {font_size}px -> {new_font_size}px")
-        
-        # Center the entire text block
-        start_x = (width + padding*2 - total_width) // 2
-        start_y = (height + padding*2 - total_height) // 2
-        
-        # Calculate individual word positions and sizes
-        word_positions = []
-        current_x = start_x
-        
-        for word in words:
-            word_bbox = draw.textbbox((0, 0), word, font=font)
-            word_width = word_bbox[2] - word_bbox[0]
-            word_height = word_bbox[3] - word_bbox[1]
-            
-            word_positions.append({
-                'word': word,
-                'x': current_x,
-                'y': start_y,
-                'width': word_width,
-                'height': word_height
-            })
-            
-            # Move to next word position (add space)
-            space_width = draw.textbbox((0, 0), ' ', font=font)[2]
-            current_x += word_width + space_width
-        
-        # Draw background highlights first (behind text)
-        for i, word_pos in enumerate(word_positions):
-            is_highlighted = (i == highlighted_word_index)
-            
-            # Only draw background for highlighted word
-            if is_highlighted:
-                bg_color = highlight_bg_color
-            else:
-                continue  # Skip background for normal words - they should have no background
-            
-            # Calculate background rectangle with padding
-            bg_x = word_pos['x'] - background_padding[0]
-            bg_y = word_pos['y'] - background_padding[1]
-            bg_width = word_pos['width'] + (background_padding[0] * 2)
-            bg_height = word_pos['height'] + (background_padding[1] * 2)
-            
-            # Draw rounded rectangle background
-            if corner_radius > 0:
-                draw.rounded_rectangle(
-                    [(bg_x, bg_y), (bg_x + bg_width, bg_y + bg_height)],
-                    radius=corner_radius,
-                    fill=(*bg_color, 255)
-                )
-            else:
-                draw.rectangle(
-                    [(bg_x, bg_y), (bg_x + bg_width, bg_y + bg_height)],
-                    fill=(*bg_color, 255)
-                )
-        
-        # Draw text on top of backgrounds
-        for i, word_pos in enumerate(word_positions):
-            draw.text(
-                (word_pos['x'], word_pos['y']), 
-                word_pos['word'], 
-                font=font, 
-                fill=(*text_color, 255)
-            )
-        
-        # Crop to original size
-        img = img.crop((padding, padding, width + padding, height + padding))
-        
-        # Ensure RGBA format
-        if img.mode != 'RGBA':
-            img = img.convert('RGBA')
-        
-        return np.array(img)
-    
-    @staticmethod
-    def create_deep_diver_effect(words: List[str],
-                                font_path: str,
-                                font_size: int,
-                                active_text_color: Tuple[int, int, int] = (0, 0, 0),  # Black for active
-                                inactive_text_color: Tuple[int, int, int] = (128, 128, 128),  # Grey for inactive
-                                background_color: Tuple[int, int, int] = (192, 192, 192),  # Light grey background
-                                highlighted_word_index: int = -1,
-                                background_padding: Tuple[int, int] = (40, 15),
-                                corner_radius: int = 25,
-                                image_size: Tuple[int, int] = (1080, 200)) -> np.ndarray:
-        """
-        Create deep diver effect: grey background with all text, active word in black, inactive in grey
-        
-        Args:
-            words: List of words to render
-            font_path: Path to font file
-            font_size: Font size in pixels
-            active_text_color: RGB color for active/highlighted word (black)
-            inactive_text_color: RGB color for inactive words (grey)
-            background_color: RGB color for the background
-            highlighted_word_index: Index of word to highlight (-1 = none)
-            background_padding: (x, y) padding around entire text block
-            corner_radius: Radius for rounded corners on background
-            image_size: Output image dimensions
-        """
-        width, height = image_size
-        padding = max(background_padding) * 3
-        
-        # Create main canvas
-        img = Image.new('RGBA', (width + padding*2, height + padding*2), (0, 0, 0, 0))
-        
-        # Load font
-        try:
-            font = ImageFont.truetype(font_path, font_size)
-        except:
-            font = ImageFont.load_default()
-        
-        # Calculate text layout - all words in one line
-        full_text = ' '.join(words)
-        draw = ImageDraw.Draw(img)
-        bbox = draw.textbbox((0, 0), full_text, font=font)
-        total_width = bbox[2] - bbox[0]
-        total_height = bbox[3] - bbox[1]
-        
-        # Auto-scale font if text is too wide
-        max_text_width = width * 0.85  # Use 85% of canvas width
-        if total_width > max_text_width:
-            scale_factor = max_text_width / total_width
-            new_font_size = int(font_size * scale_factor)
-            
-            try:
-                font = ImageFont.truetype(font_path, new_font_size)
-            except:
-                font = ImageFont.load_default()
-                
-            # Recalculate dimensions with new font
-            bbox = draw.textbbox((0, 0), full_text, font=font)
-            total_width = bbox[2] - bbox[0]
-            total_height = bbox[3] - bbox[1]
-        
-        # Get font metrics for proper vertical centering
-        ascent, descent = font.getmetrics()
-        text_height = ascent + descent
-        
-        # Center the entire text block horizontally
-        start_x = (width + padding*2 - total_width) // 2
-        
-        # Center the text vertically using font metrics for proper alignment
-        canvas_center_y = (height + padding*2) // 2
-        start_y = canvas_center_y - ascent // 2
-        
-        # Calculate background rectangle for entire text with padding
-        # Center the background around the actual text center
-        bg_x = start_x - background_padding[0]
-        bg_center_y = canvas_center_y
-        bg_y = bg_center_y - text_height//2 - background_padding[1]
-        bg_width = total_width + (background_padding[0] * 2)
-        bg_height = text_height + (background_padding[1] * 2)
-        
-        # Draw grey background for entire text block
-        if corner_radius > 0:
-            draw.rounded_rectangle(
-                [(bg_x, bg_y), (bg_x + bg_width, bg_y + bg_height)],
-                radius=corner_radius,
-                fill=(*background_color, 255)
-            )
-        else:
-            draw.rectangle(
-                [(bg_x, bg_y), (bg_x + bg_width, bg_y + bg_height)],
-                fill=(*background_color, 255)
-            )
-        
-        # Calculate individual word positions
-        word_positions = []
-        current_x = start_x
-        
-        for word in words:
-            word_bbox = draw.textbbox((0, 0), word, font=font)
-            word_width = word_bbox[2] - word_bbox[0]
-            word_height = word_bbox[3] - word_bbox[1]
-            
-            word_positions.append({
-                'word': word,
-                'x': current_x,
-                'y': start_y,
-                'width': word_width,
-                'height': word_height
-            })
-            
-            # Move to next word position (add space)
-            space_width = draw.textbbox((0, 0), ' ', font=font)[2]
-            current_x += word_width + space_width
-        
-        # Draw text with appropriate colors
-        for i, word_pos in enumerate(word_positions):
-            is_highlighted = (i == highlighted_word_index)
-            text_color = active_text_color if is_highlighted else inactive_text_color
-            
-            draw.text(
-                (word_pos['x'], word_pos['y']), 
-                word_pos['word'], 
-                font=font, 
-                fill=(*text_color, 255)
-            )
-        
-        # Crop to original size
-        img = img.crop((padding, padding, width + padding, height + padding))
-        
-        # Ensure RGBA format
-        if img.mode != 'RGBA':
-            img = img.convert('RGBA')
-        
-        return np.array(img)
-    
-    @staticmethod
-    def create_gradient_word_highlight_effect(words: List[str],
-                                            font_path: str,
-                                            font_size: int,
-                                            text_color: Tuple[int, int, int],
-                                            gradient_start: Tuple[int, int, int] = (138, 43, 226),  # Purple
-                                            gradient_end: Tuple[int, int, int] = (255, 20, 147),    # Pink
-                                            highlighted_word_index: int = -1,
-                                            background_padding: Tuple[int, int] = (25, 12),
-                                            corner_radius: int = 20,
-                                            image_size: Tuple[int, int] = (1080, 200)) -> np.ndarray:
-        """
-        Create text with gradient background highlighting for the active word
-        Similar to word_background_highlight but with gradient backgrounds
-        """
-        width, height = image_size
-        padding = max(background_padding) * 3
-        
-        # Create main canvas
-        img = Image.new('RGBA', (width + padding*2, height + padding*2), (0, 0, 0, 0))
-        
-        # Load font and calculate layout (same as above)
-        try:
-            font = ImageFont.truetype(font_path, font_size)
-        except:
-            font = ImageFont.load_default()
-        
-        full_text = ' '.join(words)
-        draw = ImageDraw.Draw(img)
-        bbox = draw.textbbox((0, 0), full_text, font=font)
-        total_width = bbox[2] - bbox[0]
-        total_height = bbox[3] - bbox[1]
-        
-        # Auto-scale font if needed
-        max_text_width = width * 0.9
-        if total_width > max_text_width:
-            scale_factor = max_text_width / total_width
-            new_font_size = int(font_size * scale_factor)
-            try:
-                font = ImageFont.truetype(font_path, new_font_size)
-            except:
-                font = ImageFont.load_default()
-            bbox = draw.textbbox((0, 0), full_text, font=font)
-            total_width = bbox[2] - bbox[0]
-            total_height = bbox[3] - bbox[1]
-        
-        start_x = (width + padding*2 - total_width) // 2
-        start_y = (height + padding*2 - total_height) // 2
         
         # Calculate word positions
         word_positions = []
-        current_x = start_x
+        total_width = 0
+        word_widths = []
         
+        # Get width of each word
         for word in words:
-            word_bbox = draw.textbbox((0, 0), word, font=font)
-            word_width = word_bbox[2] - word_bbox[0]
-            word_height = word_bbox[3] - word_bbox[1]
-            
+            bbox = draw.textbbox((0, 0), word, font=font)
+            word_width = bbox[2] - bbox[0]
+            word_widths.append(word_width)
+            total_width += word_width
+        
+        # Add spacing between words
+        space_width = draw.textbbox((0, 0), " ", font=font)[2]
+        total_width += space_width * (len(words) - 1)
+        
+        # Calculate starting position (centered)
+        x = (width - total_width) // 2 + padding
+        y = (height - font_size) // 2 + padding
+        
+        # Position each word
+        for i, word in enumerate(words):
             word_positions.append({
                 'word': word,
-                'x': current_x,
-                'y': start_y,
-                'width': word_width,
-                'height': word_height
+                'x': x,
+                'y': y,
+                'width': word_widths[i]
             })
-            
-            space_width = draw.textbbox((0, 0), ' ', font=font)[2]
-            current_x += word_width + space_width
+            x += word_widths[i] + space_width
         
-        # Draw gradient background for highlighted word only
-        if highlighted_word_index >= 0 and highlighted_word_index < len(word_positions):
-            word_pos = word_positions[highlighted_word_index]
+        # Draw backgrounds first
+        bg_img = Image.new('RGBA', img.size, (0, 0, 0, 0))
+        bg_draw = ImageDraw.Draw(bg_img)
+        
+        for i, pos in enumerate(word_positions):
+            # Determine background color
+            if i == highlighted_word_index:
+                bg_color = highlight_bg_color
+            elif normal_bg_color is not None:
+                bg_color = normal_bg_color
+            else:
+                continue  # Skip if no background for normal words
             
-            # Create gradient background
-            bg_x = word_pos['x'] - background_padding[0]
-            bg_y = word_pos['y'] - background_padding[1]
-            bg_width = word_pos['width'] + (background_padding[0] * 2)
-            bg_height = word_pos['height'] + (background_padding[1] * 2)
+            # Calculate background bounds with padding
+            bg_x1 = pos['x'] - background_padding[0]
+            bg_y1 = pos['y'] - background_padding[1]
+            bg_x2 = pos['x'] + pos['width'] + background_padding[0]
+            bg_y2 = pos['y'] + font_size + background_padding[1]
             
-            # Create gradient image
-            gradient = Image.new('RGBA', (bg_width, bg_height), (0, 0, 0, 0))
-            gradient_draw = ImageDraw.Draw(gradient)
-            
-            # Simple horizontal gradient
-            for x in range(bg_width):
-                ratio = x / bg_width
-                r = int(gradient_start[0] * (1 - ratio) + gradient_end[0] * ratio)
-                g = int(gradient_start[1] * (1 - ratio) + gradient_end[1] * ratio)
-                b = int(gradient_start[2] * (1 - ratio) + gradient_end[2] * ratio)
-                
-                gradient_draw.line([(x, 0), (x, bg_height)], fill=(r, g, b, 255))
-            
-            # Apply corner radius if needed
+            # Draw rounded rectangle background
             if corner_radius > 0:
-                # Create mask for rounded corners
-                mask = Image.new('L', (bg_width, bg_height), 0)
-                mask_draw = ImageDraw.Draw(mask)
-                mask_draw.rounded_rectangle(
-                    [(0, 0), (bg_width, bg_height)],
+                # Draw rounded rectangle
+                bg_draw.rounded_rectangle(
+                    [bg_x1, bg_y1, bg_x2, bg_y2],
                     radius=corner_radius,
-                    fill=255
+                    fill=(*bg_color, 255)
                 )
-                gradient.putalpha(mask)
-            
-            # Paste gradient onto main image
-            img.paste(gradient, (bg_x, bg_y), gradient)
+            else:
+                # Draw regular rectangle
+                bg_draw.rectangle(
+                    [bg_x1, bg_y1, bg_x2, bg_y2],
+                    fill=(*bg_color, 255)
+                )
+        
+        # Composite background onto main image
+        img = Image.alpha_composite(img, bg_img)
+        draw = ImageDraw.Draw(img)
         
         # Draw text on top
-        for word_pos in word_positions:
+        for pos in word_positions:
             draw.text(
-                (word_pos['x'], word_pos['y']), 
-                word_pos['word'], 
+                (pos['x'], pos['y']), 
+                pos['word'], 
                 font=font, 
                 fill=(*text_color, 255)
             )
@@ -411,30 +142,153 @@ class WordHighlightEffects:
     def create_deep_diver_effect(words: List[str],
                                 font_path: str,
                                 font_size: int,
-                                active_text_color: Tuple[int, int, int] = (0, 0, 0),  # Black for active
-                                inactive_text_color: Tuple[int, int, int] = (128, 128, 128),  # Grey for inactive
-                                background_color: Tuple[int, int, int] = (192, 192, 192),  # Light grey background
+                                active_text_color: Tuple[int, int, int] = (0, 0, 0),  # Black
+                                inactive_text_color: Tuple[int, int, int] = (80, 80, 80),  # Gray
+                                background_color: Tuple[int, int, int] = (140, 140, 140),  # Light gray
                                 highlighted_word_index: int = -1,
-                                background_padding: Tuple[int, int] = (40, 15),
+                                background_padding: Tuple[int, int] = (20, 10),
                                 corner_radius: int = 25,
                                 image_size: Tuple[int, int] = (1080, 200)) -> np.ndarray:
         """
-        Create deep diver effect: grey background with all text, active word in black, inactive in grey
+        Create Deep Diver style: gray background with black active word, gray inactive words
         
         Args:
             words: List of words to render
             font_path: Path to font file
             font_size: Font size in pixels
-            active_text_color: RGB color for active/highlighted word (black)
-            inactive_text_color: RGB color for inactive words (grey)
-            background_color: RGB color for the background
+            active_text_color: RGB color for active/highlighted word
+            inactive_text_color: RGB color for inactive words
+            background_color: RGB color for background
             highlighted_word_index: Index of word to highlight (-1 = none)
-            background_padding: (x, y) padding around entire text block
+            background_padding: (x, y) padding around text background
             corner_radius: Radius for rounded corners on background
             image_size: Output image dimensions
         """
         width, height = image_size
-        padding = max(background_padding) * 3
+        padding = 50  # Minimal external padding for proper centering
+        
+        # Create main canvas
+        img = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+        
+        # Load font and get font metrics
+        try:
+            font = ImageFont.truetype(font_path, font_size)
+        except:
+            font = ImageFont.load_default()
+            
+        # Create a temporary draw object to measure text
+        temp_draw = ImageDraw.Draw(img)
+        
+        # Calculate total text dimensions for all words
+        total_width = 0
+        max_height = 0
+        word_widths = []
+        word_data = []
+        
+        # Measure each word
+        for i, word in enumerate(words):
+            bbox = temp_draw.textbbox((0, 0), word, font=font)
+            word_width = bbox[2] - bbox[0]
+            word_height = bbox[3] - bbox[1]
+            word_widths.append(word_width)
+            word_data.append({
+                'word': word,
+                'width': word_width,
+                'height': word_height,
+                'bbox': bbox
+            })
+            total_width += word_width
+            max_height = max(max_height, word_height)
+        
+        # Add spacing between words
+        space_bbox = temp_draw.textbbox((0, 0), " ", font=font)
+        space_width = space_bbox[2] - space_bbox[0]
+        total_width += space_width * (len(words) - 1)
+        
+        # Get font metrics for proper vertical alignment
+        ascent, descent = font.getmetrics()
+        
+        # Calculate the single background rectangle that contains all text
+        bg_width = total_width + (background_padding[0] * 2)
+        bg_height = ascent + descent + (background_padding[1] * 2)
+        
+        # Center the background rectangle
+        bg_x = (width - bg_width) // 2
+        bg_y = (height - bg_height) // 2
+        
+        # Draw the background
+        bg_img = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+        bg_draw = ImageDraw.Draw(bg_img)
+        
+        # Draw background rectangle
+        bg_draw.rounded_rectangle(
+            [bg_x, bg_y, bg_x + bg_width, bg_y + bg_height],
+            radius=corner_radius,
+            fill=(*background_color, 255)
+        )
+        
+        # Composite background onto main image
+        img = Image.alpha_composite(img, bg_img)
+        draw = ImageDraw.Draw(img)
+        
+        # Calculate text starting position (centered within background)
+        text_x = bg_x + background_padding[0]
+        text_y = bg_y + background_padding[1]
+        
+        # Draw each word
+        current_x = text_x
+        for i, word_info in enumerate(word_data):
+            # Choose color based on whether word is highlighted
+            if i == highlighted_word_index:
+                color = active_text_color
+            else:
+                color = inactive_text_color
+            
+            # Draw word at calculated position
+            draw.text(
+                (current_x, text_y), 
+                word_info['word'], 
+                font=font, 
+                fill=(*color, 255)
+            )
+            
+            # Move to next word position
+            current_x += word_info['width'] + space_width
+        
+        # Ensure RGBA format
+        if img.mode != 'RGBA':
+            img = img.convert('RGBA')
+        
+        return np.array(img)
+    
+    @staticmethod
+    def create_full_background_with_word_highlight(words: List[str],
+                                                 font_path: str,
+                                                 font_size: int,
+                                                 text_color: Tuple[int, int, int],
+                                                 background_color: Tuple[int, int, int],
+                                                 highlighted_word_index: int = -1,
+                                                 background_padding: Tuple[int, int] = (40, 20),
+                                                 corner_radius: int = 15,
+                                                 highlight_brightness_boost: int = 0,
+                                                 image_size: Tuple[int, int] = (1080, 200)) -> np.ndarray:
+        """
+        Create text with full background and optional word highlighting through brightness change
+        
+        Args:
+            words: List of words to render
+            font_path: Path to font file
+            font_size: Font size in pixels
+            text_color: RGB color for text
+            background_color: RGB color for background
+            highlighted_word_index: Index of word to highlight (-1 = none)
+            background_padding: (x, y) padding around text
+            corner_radius: Radius for rounded corners
+            highlight_brightness_boost: Amount to brighten background for highlighted word
+            image_size: Output image dimensions
+        """
+        width, height = image_size
+        padding = max(background_padding) * 2
         
         # Create main canvas
         img = Image.new('RGBA', (width + padding*2, height + padding*2), (0, 0, 0, 0))
@@ -445,93 +299,293 @@ class WordHighlightEffects:
         except:
             font = ImageFont.load_default()
         
-        # Calculate text layout - all words in one line
-        full_text = ' '.join(words)
+        # Join words
+        text = ' '.join(words)
+        
+        # Measure text
         draw = ImageDraw.Draw(img)
-        bbox = draw.textbbox((0, 0), full_text, font=font)
-        total_width = bbox[2] - bbox[0]
-        total_height = bbox[3] - bbox[1]
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
         
-        # Auto-scale font if text is too wide
-        max_text_width = width * 0.85  # Use 85% of canvas width
-        if total_width > max_text_width:
-            scale_factor = max_text_width / total_width
-            new_font_size = int(font_size * scale_factor)
-            
-            try:
-                font = ImageFont.truetype(font_path, new_font_size)
-            except:
-                font = ImageFont.load_default()
-                
-            # Recalculate dimensions with new font
-            bbox = draw.textbbox((0, 0), full_text, font=font)
-            total_width = bbox[2] - bbox[0]
-            total_height = bbox[3] - bbox[1]
-        
-        # Get font metrics for proper vertical centering
-        ascent, descent = font.getmetrics()
-        text_height = ascent + descent
-        
-        # Center the entire text block horizontally
-        start_x = (width + padding*2 - total_width) // 2
-        
-        # Center the text vertically using font metrics for proper alignment
-        canvas_center_y = (height + padding*2) // 2
-        start_y = canvas_center_y - ascent // 2
-        
-        # Calculate background rectangle for entire text with padding
-        # Center the background around the actual text center
-        bg_x = start_x - background_padding[0]
-        bg_center_y = canvas_center_y
-        bg_y = bg_center_y - text_height//2 - background_padding[1]
-        bg_width = total_width + (background_padding[0] * 2)
+        # Calculate background bounds
+        bg_width = text_width + (background_padding[0] * 2)
         bg_height = text_height + (background_padding[1] * 2)
         
-        # Draw grey background for entire text block
-        if corner_radius > 0:
-            draw.rounded_rectangle(
-                [(bg_x, bg_y), (bg_x + bg_width, bg_y + bg_height)],
+        # Center position
+        bg_x = (width - bg_width) // 2 + padding
+        bg_y = (height - bg_height) // 2 + padding
+        
+        # Draw background
+        bg_draw = ImageDraw.Draw(img)
+        
+        # Apply brightness boost if word is highlighted
+        bg_color = background_color
+        if highlighted_word_index >= 0 and highlight_brightness_boost > 0:
+            bg_color = tuple(min(255, c + highlight_brightness_boost) for c in background_color)
+        
+        # Draw rounded rectangle background
+        bg_draw.rounded_rectangle(
+            [bg_x, bg_y, bg_x + bg_width, bg_y + bg_height],
+            radius=corner_radius,
+            fill=(*bg_color, 255)
+        )
+        
+        # Draw text
+        text_x = bg_x + background_padding[0]
+        text_y = bg_y + background_padding[1]
+        
+        draw.text(
+            (text_x, text_y), 
+            text, 
+            font=font, 
+            fill=(*text_color, 255)
+        )
+        
+        # Crop to original size
+        img = img.crop((padding, padding, width + padding, height + padding))
+        
+        # Ensure RGBA format
+        if img.mode != 'RGBA':
+            img = img.convert('RGBA')
+        
+        return np.array(img)
+    
+    @staticmethod
+    def create_horizontal_flip_effect(words: List[str],
+                                    font_path: str,
+                                    font_size: int,
+                                    text_color: Tuple[int, int, int],
+                                    background_color: Tuple[int, int, int],
+                                    highlighted_word_index: int = -1,
+                                    flip_progress: float = 0.0,
+                                    background_padding: Tuple[int, int] = (20, 10),
+                                    corner_radius: int = 15,
+                                    image_size: Tuple[int, int] = (1080, 200)) -> np.ndarray:
+        """
+        Create text with horizontal flip animation for highlighted word
+        
+        Args:
+            words: List of words to render
+            font_path: Path to font file
+            font_size: Font size in pixels
+            text_color: RGB color for text
+            background_color: RGB color for background
+            highlighted_word_index: Index of word to flip (-1 = none)
+            flip_progress: Animation progress (0.0 to 1.0)
+            background_padding: (x, y) padding around each word
+            corner_radius: Radius for rounded corners
+            image_size: Output image dimensions
+        """
+        width, height = image_size
+        padding = 50
+        
+        # Create main canvas
+        img = Image.new('RGBA', (width + padding*2, height + padding*2), (0, 0, 0, 0))
+        
+        # Load font
+        try:
+            font = ImageFont.truetype(font_path, font_size)
+        except:
+            font = ImageFont.load_default()
+        
+        # Calculate word positions (same as before)
+        draw = ImageDraw.Draw(img)
+        word_positions = []
+        total_width = 0
+        word_widths = []
+        
+        for word in words:
+            bbox = draw.textbbox((0, 0), word, font=font)
+            word_width = bbox[2] - bbox[0]
+            word_widths.append(word_width)
+            total_width += word_width
+        
+        space_width = draw.textbbox((0, 0), " ", font=font)[2]
+        total_width += space_width * (len(words) - 1)
+        
+        x = (width - total_width) // 2 + padding
+        y = (height - font_size) // 2 + padding
+        
+        for i, word in enumerate(words):
+            word_positions.append({
+                'word': word,
+                'x': x,
+                'y': y,
+                'width': word_widths[i]
+            })
+            x += word_widths[i] + space_width
+        
+        # Draw each word
+        for i, pos in enumerate(word_positions):
+            # Create word image
+            word_img = Image.new('RGBA', (int(pos['width'] + background_padding[0]*2), 
+                                         int(font_size + background_padding[1]*2)), 
+                                        (0, 0, 0, 0))
+            word_draw = ImageDraw.Draw(word_img)
+            
+            # Draw background
+            word_draw.rounded_rectangle(
+                [0, 0, word_img.width-1, word_img.height-1],
                 radius=corner_radius,
                 fill=(*background_color, 255)
             )
-        else:
-            draw.rectangle(
-                [(bg_x, bg_y), (bg_x + bg_width, bg_y + bg_height)],
-                fill=(*background_color, 255)
-            )
-        
-        # Calculate individual word positions
-        word_positions = []
-        current_x = start_x
-        
-        for word in words:
-            word_bbox = draw.textbbox((0, 0), word, font=font)
-            word_width = word_bbox[2] - word_bbox[0]
-            word_height = word_bbox[3] - word_bbox[1]
             
-            word_positions.append({
-                'word': word,
-                'x': current_x,
-                'y': start_y,
-                'width': word_width,
-                'height': word_height
-            })
-            
-            # Move to next word position (add space)
-            space_width = draw.textbbox((0, 0), ' ', font=font)[2]
-            current_x += word_width + space_width
-        
-        # Draw text with appropriate colors
-        for i, word_pos in enumerate(word_positions):
-            is_highlighted = (i == highlighted_word_index)
-            text_color = active_text_color if is_highlighted else inactive_text_color
-            
-            draw.text(
-                (word_pos['x'], word_pos['y']), 
-                word_pos['word'], 
+            # Draw text
+            word_draw.text(
+                (background_padding[0], background_padding[1]), 
+                pos['word'], 
                 font=font, 
                 fill=(*text_color, 255)
             )
+            
+            # Apply flip effect if this is the highlighted word
+            if i == highlighted_word_index and flip_progress > 0:
+                # Scale horizontally based on flip progress
+                # 0->0.5: scale from 1 to 0, 0.5->1: scale from 0 to 1
+                if flip_progress <= 0.5:
+                    scale_x = 1.0 - (flip_progress * 2)
+                else:
+                    scale_x = (flip_progress - 0.5) * 2
+                
+                if scale_x > 0:
+                    new_width = max(1, int(word_img.width * scale_x))
+                    word_img = word_img.resize((new_width, word_img.height), Image.Resampling.LANCZOS)
+            
+            # Paste word onto main image
+            paste_x = pos['x'] - background_padding[0]
+            if i == highlighted_word_index and flip_progress > 0:
+                # Center the flipped word
+                paste_x += (pos['width'] + background_padding[0]*2 - word_img.width) // 2
+            
+            img.paste(word_img, (int(paste_x), int(pos['y'] - background_padding[1])), word_img)
+        
+        # Crop to original size
+        img = img.crop((padding, padding, width + padding, height + padding))
+        
+        # Ensure RGBA format
+        if img.mode != 'RGBA':
+            img = img.convert('RGBA')
+        
+        return np.array(img)
+    
+    @staticmethod
+    def create_underline_effect(text: str,
+                               font_path: str,
+                               font_size: int,
+                               text_color: Tuple[int, int, int],
+                               outline_color: Tuple[int, int, int] = (0, 0, 0),
+                               outline_width: int = 5,
+                               underline_color: Tuple[int, int, int] = (147, 51, 234),
+                               underline_height: int = 8,
+                               underline_offset: int = 10,
+                               highlighted_word_index: int = -1,
+                               image_size: Tuple[int, int] = (1080, 200)) -> np.ndarray:
+        """
+        Create text with hand-drawn style underline effect for highlighted word
+        
+        Args:
+            text: Text to render
+            font_path: Path to font file
+            font_size: Font size in pixels
+            text_color: RGB color for text
+            outline_color: RGB color for text outline
+            outline_width: Width of text outline
+            underline_color: RGB color for underline
+            underline_height: Height/thickness of underline
+            underline_offset: Vertical offset from text baseline
+            highlighted_word_index: Index of word to underline (-1 = none)
+            image_size: Output image dimensions
+        """
+        width, height = image_size
+        padding = 50
+        
+        # Create main canvas
+        img = Image.new('RGBA', (width + padding*2, height + padding*2), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        
+        # Load font
+        try:
+            font = ImageFont.truetype(font_path, font_size)
+        except:
+            font = ImageFont.load_default()
+        
+        # Split text into words
+        words = text.split()
+        
+        # Calculate word positions
+        word_positions = []
+        total_width = 0
+        word_widths = []
+        
+        # Get width of each word
+        for word in words:
+            bbox = draw.textbbox((0, 0), word, font=font)
+            word_width = bbox[2] - bbox[0]
+            word_widths.append(word_width)
+            total_width += word_width
+        
+        # Add spacing between words
+        space_width = draw.textbbox((0, 0), " ", font=font)[2]
+        total_width += space_width * (len(words) - 1)
+        
+        # Calculate starting position (centered)
+        x = (width - total_width) // 2 + padding
+        y = (height - font_size) // 2 + padding
+        
+        # Position each word
+        for i, word in enumerate(words):
+            word_positions.append({
+                'word': word,
+                'x': x,
+                'y': y,
+                'width': word_widths[i]
+            })
+            x += word_widths[i] + space_width
+        
+        # Draw text with outline effect
+        for i, pos in enumerate(word_positions):
+            # Draw outline
+            for dx in range(-outline_width, outline_width + 1):
+                for dy in range(-outline_width, outline_width + 1):
+                    if dx*dx + dy*dy <= outline_width*outline_width:
+                        draw.text(
+                            (pos['x'] + dx, pos['y'] + dy), 
+                            pos['word'], 
+                            font=font, 
+                            fill=(*outline_color, 255)
+                        )
+            
+            # Draw main text
+            draw.text(
+                (pos['x'], pos['y']), 
+                pos['word'], 
+                font=font, 
+                fill=(*text_color, 255)
+            )
+        
+        # Draw underline for highlighted word
+        if 0 <= highlighted_word_index < len(word_positions):
+            pos = word_positions[highlighted_word_index]
+            
+            # Calculate underline position
+            text_bbox = draw.textbbox((pos['x'], pos['y']), pos['word'], font=font)
+            underline_y = text_bbox[3] + underline_offset
+            underline_start_x = pos['x']
+            underline_end_x = pos['x'] + pos['width']
+            
+            # Create hand-drawn effect with slight waviness
+            points = []
+            num_points = 20
+            for i in range(num_points + 1):
+                x_pos = underline_start_x + (underline_end_x - underline_start_x) * i / num_points
+                # Add slight wave effect
+                y_offset = np.sin(i * 0.5) * 2
+                points.append((x_pos, underline_y + y_offset))
+            
+            # Draw underline with thickness
+            for i in range(len(points) - 1):
+                draw.line([points[i], points[i + 1]], fill=(*underline_color, 255), width=underline_height)
         
         # Crop to original size
         img = img.crop((padding, padding, width + padding, height + padding))

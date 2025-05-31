@@ -53,8 +53,11 @@ class StyledSubtitleLayer:
         self.safe_right = resolution[0] - 50 if safe_zones else resolution[0] - 30
         self.safe_width = self.safe_right - self.safe_left
         
-        # Group words into windows (3 words per window for now)
-        self.word_windows = self._create_word_windows()
+        # Group words into windows using style configuration
+        words_per_window = 3  # default fallback
+        if hasattr(self.style, 'config') and 'layout' in self.style.config:
+            words_per_window = self.style.config['layout'].get('words_per_window', 3)
+        self.word_windows = self._create_word_windows(words_per_window)
         
     def _create_word_windows(self, words_per_window: int = 3):
         """Group words into display windows"""
@@ -119,6 +122,8 @@ class StyledSubtitleLayer:
                 return self._render_word_highlight_style(canvas, active_window, current_word_idx, time)
             elif effect_type == 'deep_diver':
                 return self._render_deep_diver_style(canvas, active_window, current_word_idx, time)
+            elif effect_type == 'underline':
+                return self._render_underline_style(canvas, active_window, current_word_idx, time)
             else:
                 return self._render_simple_style(canvas, active_window, current_word_idx, time)
         else:
@@ -378,7 +383,7 @@ class StyledSubtitleLayer:
     
     def _render_deep_diver_style(self, canvas, window, highlight_idx, time):
         """Render deep diver style with full background and word color changes"""
-        from subtitle_styles.effects.word_highlight_effects import WordHighlightEffects
+        from subtitle_styles.effects.word_highlight_effects_manual_fix import WordHighlightEffects
         
         # Get the words from window
         words = [w['word'] for w in window['words']]
@@ -466,6 +471,42 @@ class StyledSubtitleLayer:
         )
         
         return canvas
+    
+    def _render_underline_style(self, canvas, window, highlight_idx, time):
+        """Render underline style with purple underline on highlighted word"""
+        text = window['text']
+        
+        # Get styled text with underline effect
+        if hasattr(self.style, 'create_styled_text'):
+            text_img = self.style.create_styled_text(
+                text,
+                self.style.config['typography']['font_size'],
+                time,
+                highlight_idx is not None,  # is_highlighted
+                highlight_idx  # word_index for underlining
+            )
+        else:
+            # Fallback to simple rendering
+            text_img = self.style.create_styled_text(
+                text,
+                self.style.config['typography']['font_size'],
+                time,
+                False
+            )
+        
+        # Check if text exceeds safe width and resize if needed
+        if text_img.shape[1] > self.safe_width:
+            scale_factor = self.safe_width / text_img.shape[1]
+            scale_factor *= 0.95  # Use 95% of available width for safety
+            new_width = int(text_img.shape[1] * scale_factor)
+            new_height = int(text_img.shape[0] * scale_factor)
+            
+            from PIL import Image
+            img_pil = Image.fromarray(text_img)
+            img_pil = img_pil.resize((new_width, new_height), Image.Resampling.LANCZOS)
+            text_img = np.array(img_pil)
+        
+        return self._composite_center(canvas, text_img)
     
     def get_key(self, time: float):
         """Get cache key for this time"""

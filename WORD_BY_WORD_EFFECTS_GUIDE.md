@@ -1,7 +1,7 @@
 # Word-by-Word Effects Implementation Guide
 
 ## Overview
-This document explains how word-by-word subtitle effects are implemented in the VinVideo project using the Movis library. The system supports 6 finalized subtitle styles, each with unique visual characteristics and word-by-word highlighting behaviors. All styles are optimized for 9:16 aspect ratio (1080x1920) and designed for Instagram, YouTube Shorts, and TikTok content.
+This document explains how word-by-word subtitle effects are implemented in the VinVideo project using the Movis library. The system supports 9 finalized subtitle styles, each with unique visual characteristics and word-by-word highlighting behaviors. All styles are optimized for 9:16 aspect ratio (1080x1920) and designed for Instagram, YouTube Shorts, and TikTok content.
 
 ## Architecture Overview
 
@@ -246,11 +246,12 @@ JSON Config → Style Loader → Effect Engine → Movis Layer → Final Video
 
 #### Implementation Details
 - Uses `_create_deep_diver_text()` method in `json_style_loader.py`
-- Calls `WordHighlightEffects.create_deep_diver_effect()` from `word_highlight_effects.py`
+- Calls `WordHighlightEffects.create_deep_diver_effect()` from `word_highlight_effects_manual_fix.py`
 - Renders single background encompassing all text
 - Each word colored individually based on active state
 - Perfect text centering using font metrics (ascent/descent)
 - Optimized background sizing prevents oversized boxes
+- **Manual Centering Fix**: Applied -40px horizontal offset to correct rendering alignment issue
 - Ideal for philosophical, contemplative, or educational content
 
 ## Technical Implementation Details
@@ -350,6 +351,90 @@ composition.add_layer(subtitle_layer, name="subtitles")
   "background": [140, 140, 140]   // Light gray background
 }
 ```
+
+### 8. Green Goblin
+**Purpose**: Clean dynamic highlighting without glow effects for professional presentations
+
+#### Typography
+- **Font**: Manrope ExtraBold (`/Users/naman/Desktop/movie_py/subtitle_styles/fonts/Manrope-ExtraBold.ttf`)
+- **Size**: 108px (both normal and highlighted)
+- **Transform**: Uppercase
+- **Alignment**: Center
+- **Weight**: 800 (ExtraBold)
+
+#### Colors
+- **Text Normal**: White `[255, 255, 255]`
+- **Text Highlighted**: Bright Green `[57, 255, 20]`
+- **Outline**: Black `[0, 0, 0]`
+- **Outline Width**: 3px
+
+#### Highlighting Behavior
+- **Effect Type**: `dual_glow`
+- **Highlight Method**: `dual_glow_with_scale`
+- **Animation**: Color change (white → green) + auto-scaling (1.1x)
+- **Transition Duration**: 0.2 seconds
+- **Words Per Window**: 3
+- **Glow**: Disabled (radius=0, intensity=0.0)
+
+#### Implementation Details
+- Uses `_render_dual_glow_style()` method in `movis_layer.py`
+- Calls `TextEffects.create_dual_glow_text()` from `text_effects.py`
+- Combines karaoke-style effects with clean outline rendering
+- Auto-scaling provides emphasis without glow effects
+- Same font and sizing as karaoke style but different color scheme
+
+---
+
+### 9. Sgone Caption
+**Purpose**: Center-positioned style with The Sgone font displaying maximum 2 words at a time
+
+#### Typography
+- **Font**: The Sgone (`/Users/naman/Desktop/movie_py/subtitle_styles/fonts/The Sgone.otf`)
+- **Size**: 65px (normal), 75px (highlighted)
+- **Transform**: Lowercase
+- **Alignment**: Center
+- **Weight**: Regular
+
+#### Colors
+- **Text**: White `[255, 255, 255]`
+- **Outline**: Black `[0, 0, 0]`
+- **Outline Width**: 4px
+
+#### Positioning
+- **Layout**: Center screen positioning
+- **Safe Margins**: Top: 200px, Bottom: 200px, Horizontal: 100px
+- **Max Width**: 600px (prevents text overflow)
+
+#### Highlighting Behavior
+- **Effect Type**: `outline`
+- **Highlight Method**: `size_pulse`
+- **Animation**: Text size increases from 65px to 75px when highlighted
+- **Transition Duration**: 0.2 seconds
+- **Words Per Window**: 2 (strictly enforced)
+
+#### Implementation Details
+- Uses `_create_outline_text()` method in `json_style_loader.py`
+- Calls `TextEffects.create_outline_effect()` from `text_effects.py`
+- **Auto-scaling enabled**: Font reduces if text exceeds 600px width
+- **Fixed word windowing**: Only 2 words displayed at once, cycling through pairs
+- Custom font integration with The Sgone typeface
+- Center positioning optimized for social media formats
+- Ideal for artistic, unique content with distinctive typography
+
+## Troubleshooting
+
+### Deep Diver Centering Issue (Fixed)
+**Problem**: In 9:16 format, the Deep Diver caption appeared shifted to the right.
+
+**Solution**: Manual horizontal offset adjustment in `word_highlight_effects_manual_fix.py`
+- Edit `MANUAL_OFFSET = -40` to adjust centering
+- Negative values shift left, positive values shift right
+- Test with increments of 5-10 pixels for fine-tuning
+
+**Files Modified**:
+- `subtitle_styles/effects/word_highlight_effects_manual_fix.py` (fix implementation)
+- `subtitle_styles/core/movis_layer.py` (import update)
+- `subtitle_styles/core/json_style_loader.py` (import update)
 
 ## Future Development
 

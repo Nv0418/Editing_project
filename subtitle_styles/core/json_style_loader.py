@@ -50,6 +50,8 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
             return self._create_word_highlight_text(text, font_size, time, is_highlighted, word_index)
         elif effect_type == 'deep_diver':
             return self._create_deep_diver_text(text, font_size, time, is_highlighted, word_index)
+        elif effect_type == 'underline':
+            return self._create_underline_text(text, font_size, time, is_highlighted, word_index)
         else:
             # Fallback to simple text
             return self._create_simple_text(text, font_size, is_highlighted)
@@ -410,7 +412,7 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
     
     def _create_word_highlight_text(self, text: str, font_size: int, time: float, is_highlighted: bool = False, word_index: int = -1) -> np.ndarray:
         """Create text with word-by-word background highlighting"""
-        from subtitle_styles.effects.word_highlight_effects import WordHighlightEffects
+        from subtitle_styles.effects.word_highlight_effects_manual_fix import WordHighlightEffects
         
         typo = self.config['typography']
         effects = self.config.get('effect_parameters', {})
@@ -456,7 +458,7 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
     
     def _create_deep_diver_text(self, text: str, font_size: int, time: float = 0, is_highlighted: bool = False, word_index: Optional[int] = None) -> np.ndarray:
         """Create deep diver effect text"""
-        from subtitle_styles.effects.word_highlight_effects import WordHighlightEffects
+        from subtitle_styles.effects.word_highlight_effects_manual_fix import WordHighlightEffects
         typo = self.config['typography']
         effects = self.config.get('effect_parameters', {})
         
@@ -537,6 +539,45 @@ class JSONConfiguredStyle(BaseSubtitleStyle):
         draw.text((x, y), text, font=font, fill=(*color, 255))
         
         return np.array(img)
+    
+    def _create_underline_text(self, text: str, font_size: int, time: float, is_highlighted: bool = False, word_index: int = -1) -> np.ndarray:
+        """Create text with underline effect for highlighted words"""
+        typo = self.config['typography']
+        effects = self.config.get('effect_parameters', {})
+        
+        # Transform text if needed
+        if typo.get('text_transform') == 'uppercase':
+            text = text.upper()
+        elif typo.get('text_transform') == 'lowercase':
+            text = text.lower()
+        
+        # Get colors
+        text_color = tuple(typo['colors']['text'])
+        outline_color = tuple(typo['colors'].get('outline', [0, 0, 0]))
+        underline_color = tuple(typo['colors'].get('underline', [147, 51, 234]))
+        
+        # Get effect parameters
+        outline_width = effects.get('outline_width', 5)
+        underline_height = effects.get('underline_height', 8)
+        underline_offset = effects.get('underline_offset', 10)
+        
+        # Import WordHighlightEffects for underline effect
+        from subtitle_styles.effects.word_highlight_effects import WordHighlightEffects
+        
+        # Create underline effect
+        return WordHighlightEffects.create_underline_effect(
+            text=text,
+            font_path=typo['font_family'],
+            font_size=int(font_size),
+            text_color=text_color,
+            outline_color=outline_color,
+            outline_width=outline_width,
+            underline_color=underline_color,
+            underline_height=underline_height,
+            underline_offset=underline_offset,
+            highlighted_word_index=word_index if is_highlighted else -1,
+            image_size=(1080, 200)
+        )
 
 
 class StyleLoader:
