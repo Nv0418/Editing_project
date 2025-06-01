@@ -1,17 +1,65 @@
-/* Font Face Declarations */
+/* Font Face Declarations - All Approved Styles */
+@font-face {
+    font-family: 'Oswald Heavy';
+    src: url('/fonts/Oswald-Heavy.ttf') format('truetype');
+    font-weight: heavy;
+    font-style: normal;
+    font-display: swap;
+}
+
 @font-face {
     font-family: 'Bicyclette Black';
     src: url('/fonts/Bicyclette-Black.ttf') format('truetype');
     font-weight: 900;
     font-style: normal;
-    font-display: swap; /* Show text immediately, swap when font loads */
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Impact';
+    src: url('/fonts/Impact.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
     font-family: 'Alverata Bold Italic';
     src: url('/fonts/alverata-bold-italic.ttf') format('truetype');
-    font-weight: 700;
+    font-weight: 800;
     font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Mazzard M Bold';
+    src: url('/fonts/mazzard-m-bold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Publica Sans Round Bold';
+    src: url('/fonts/PublicaSansRound-Bd.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Manrope ExtraBold';
+    src: url('/fonts/Manrope-ExtraBold.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'The Sgone';
+    src: url('/fonts/The Sgone.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
     font-display: swap;
 }
 
@@ -115,22 +163,26 @@ body {
     margin-bottom: 20px;
 }
 
-/* Styles Grid */
+/* Styles Grid - 3x3 Layout */
 .styles-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 20px;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 /* Style Card */
 .style-card {
     background: #252525;
     border: 2px solid #333;
-    border-radius: 8px;
-    padding: 15px;
+    border-radius: 12px;
+    padding: 18px;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
+    text-align: center;
 }
 
 .style-card:hover {
@@ -158,11 +210,29 @@ body {
     box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
 }
 
-/* Style Preview Mini */
+/* Style Preview Image Container */
+.style-preview-image-container {
+    height: 120px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    background: #333;
+    position: relative;
+}
+
+/* Style Preview Image */
+.style-preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+}
+
+/* Style Preview Mini (fallback) */
 .style-preview-mini {
-    height: 50px;
+    height: 100%;
     border-radius: 6px;
-    margin-bottom: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -170,21 +240,20 @@ body {
     font-size: 12px;
     background: #333;
     color: white;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
-/* Style Name and Type */
+/* Style Name */
 .style-name {
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-size: 1.1rem;
+    font-weight: 700;
     color: white;
-    margin-bottom: 5px;
-}
-
-.style-type {
-    font-size: 0.8rem;
-    opacity: 0.7;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    margin-bottom: 0;
+    text-align: center;
 }
 
 /* Right Panel */
@@ -206,17 +275,19 @@ body {
     color: white;
 }
 
-/* Canvas Container */
+/* Canvas Container - Full 9:16 Aspect Ratio */
 .canvas-container {
     background: #000;
     border-radius: 8px;
-    padding: 20px;
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 700px;
+    width: 100%;
+    aspect-ratio: 9 / 16;
     margin-bottom: 20px;
     position: relative;
+    overflow: hidden;
 }
 
 /* Preview Info */
@@ -262,17 +333,16 @@ body {
     background: #444;
 }
 
-/* Mini preview style classes */
+/* Mini preview style classes - Approved Styles Only */
 .mini-simple { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.mini-background { background: linear-gradient(135deg, #00ffff 0%, #0099cc 100%); }
-.mini-glow { background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%); }
-.mini-highlight { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); }
-.mini-dashing { background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%); }
-.mini-newscore { background: linear-gradient(135deg, #ffff00 0%, #ffd700 100%); color: #333 !important; }
-.mini-popling { background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%); }
-.mini-whistle { background: linear-gradient(135deg, #20b2aa 0%, #008b8b 100%); }
-.mini-karaoke { background: linear-gradient(135deg, #00ff00 0%, #32cd32 100%); }
-.mini-tilted { background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%); transform: rotate(-3deg); }
+.mini-background { background: linear-gradient(135deg, #003366 0%, #0044aa 100%); }
+.mini-glow { background: linear-gradient(135deg, #39ff14 0%, #00cc00 100%); }
+.mini-karaoke-style { background: linear-gradient(135deg, #ffff00 0%, #ffd700 100%); color: #333 !important; }
+.mini-highlight { background: linear-gradient(135deg, #7e57c2 0%, #5e35b1 100%); }
+.mini-deep-diver { background: linear-gradient(135deg, #8c8c8c 0%, #505050 100%); }
+.mini-popling { background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%); }
+.mini-greengoblin { background: linear-gradient(135deg, #39ff14 0%, #00cc00 100%); }
+.mini-sgone { background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%); color: #333 !important; }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
