@@ -1,0 +1,67 @@
+{
+  "composition": {
+    "resolution": [1080, 1920],
+    "duration": 10.0,
+    "fps": 30,
+    "background_color": [0, 0, 0]
+  },
+  "image_sequence": [
+    {
+      "source": "game_of_thrones_images/image_1_1747481532.png",
+      "start_time": 0.0,
+      "end_time": 3.5,
+      "position": [540, 960],
+      "scale": 1.0,
+      "ken_burns": {
+        "type": "zoom_in",
+        "start_scale": 1.0,
+        "end_scale": 1.2
+      }
+    },
+    {
+      "source": "game_of_thrones_images/image_2_1747481554.png", 
+      "start_time": 3.0,
+      "end_time": 6.5,
+      "position": [540, 960],
+      "scale": 1.0,
+      "transition": {
+        "type": "crossfade",
+        "duration": 0.5
+      },
+      "ken_burns": {
+        "type": "zoom_out",
+        "start_scale": 1.2,
+        "end_scale": 1.0
+      }
+    },
+    {
+      "source": "game_of_thrones_images/image_3_1747481575.png",
+      "start_time": 6.0,
+      "end_time": 10.0,
+      "position": [540, 960],
+      "scale": 1.0,
+      "transition": {
+        "type": "crossfade",
+        "duration": 0.5
+      },
+      "ken_burns": {
+        "type": "zoom_in",
+        "start_scale": 1.0,
+        "end_scale": 1.15
+      }
+    }
+  ],
+  "audio": {
+    "narration": {
+      "source": "other_root_files/got_script.mp3",
+      "level": 0.0,
+      "offset": 0.0
+    }
+  },
+  "subtitles": {
+    "parakeet_data": "other_root_files/parakeet_output.json",
+    "style": "popling_caption",
+    "position": "bottom",
+    "safe_zones": true
+  }
+}
