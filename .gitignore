@@ -91,3 +91,17 @@ Thumbs.db
 *.bin
 *.model
 *.weights
+
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Generated/temporary files
+generated_editing_plan.json
+temp_editing_plan.json
+test_*.mp4
+test_*.json
+temp_samples/
