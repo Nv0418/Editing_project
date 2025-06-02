@@ -1,45 +1,32 @@
-# VinVideo Editing Pipeline Usage Guide
+# VinVideo LLM-Based Editing Pipeline Usage Guide
 
 ## Overview
 
-The complete VinVideo editing pipeline consists of three main components that work together to transform AI agent outputs into professional videos.
+The VinVideo editing pipeline uses an LLM-based Editing Agent (Qwen-3 32B) to transform AI agent outputs into professional videos through intelligent JSON generation and Movis integration.
 
 ## Pipeline Components
 
-### 1. **Editing Agent** (`editing_agent.py`)
-- **Input**: Structured outputs from Director, Producer, and Prompt Engineer agents
-- **Process**: Makes creative editing decisions based on beat alignment and content analysis
-- **Output**: JSON editing plan compatible with Movis pipeline
+### 1. **LLM Editing Agent** (Deployed on RunPod)
+- **Input**: JSON files from Director, Producer, and Prompt Engineer agents
+- **Process**: Advanced AI reasoning for creative editing decisions based on content analysis
+- **Output**: Professional JSON editing plan compatible with Movis pipeline
 
 ### 2. **Editing Agent to Movis Converter** (`editing_agent_to_movis.py`)
-- **Input**: JSON editing plan from Editing Agent
+- **Input**: JSON editing plan from LLM Editing Agent
 - **Process**: Converts JSON to Movis composition, handles assets, applies effects
 - **Output**: Final MP4 video file
 
 ### 3. **Full Pipeline Script** (`full_editing_pipeline.py`)
-- **Input**: Agent output files or mock data
-- **Process**: Runs complete workflow end-to-end
-- **Output**: Final video with optional intermediate JSON
+- **Input**: Agent output JSON files
+- **Process**: Coordinates LLM agent calls and Movis conversion
+- **Output**: Final video with validation and error handling
 
 ## Usage Examples
-
-### Basic Usage (with mock data)
-
-```bash
-# Test the Editing Agent alone
-python3 editing_agent.py
-
-# Test the complete pipeline with mock data
-python3 full_editing_pipeline.py --mock --output test_video.mp4
-
-# Save intermediate JSON for inspection
-python3 full_editing_pipeline.py --mock --output video.mp4 --save-json plan.json
-```
 
 ### Production Usage (with real agent outputs)
 
 ```bash
-# Run complete pipeline with agent files
+# Run complete pipeline with agent JSON files
 python3 full_editing_pipeline.py \
   --producer producer_output.json \
   --director director_output.json \
@@ -47,20 +34,34 @@ python3 full_editing_pipeline.py \
   --output final_video.mp4
 ```
 
-### Two-Step Process (for debugging)
+### Two-Step Process (for development/debugging)
 
 ```bash
-# Step 1: Generate editing plan
-python3 -c "
-from editing_agent import *
-producer, director, pe = create_mock_agent_outputs()
-agent = EditingAgent()
-plan = agent.process_agent_outputs(producer, director, pe)
-agent.save_editing_plan(plan, 'my_plan.json')
-"
+# Step 1: Generate editing plan using LLM agent
+python3 llm_editing_agent.py \
+  --producer producer_output.json \
+  --director director_output.json \
+  --prompt-engineer prompt_engineer_output.json \
+  --output editing_plan.json
 
-# Step 2: Convert to video (when Movis is available)
-python3 editing_agent_to_movis.py my_plan.json output_video.mp4
+# Step 2: Convert to video using Movis
+python3 editing_agent_to_movis.py editing_plan.json output_video.mp4
+```
+
+### Testing and Validation
+
+```bash
+# Validate JSON output format
+python3 editing_agent_to_movis.py \
+  --validate-only editing_plan.json
+
+# Test with verbose logging
+python3 editing_agent_to_movis.py \
+  editing_plan.json output.mp4 --verbose
+
+# Test without asset validation (for development)
+python3 editing_agent_to_movis.py \
+  editing_plan.json output.mp4 --no-validate-assets
 ```
 
 ## Agent Input Format
