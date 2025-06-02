@@ -18,7 +18,7 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import movis as mv
-from movis.enum import BlendingMode
+from movis import BlendingMode
 from subtitle_styles.core.json_style_loader import StyleLoader
 from subtitle_styles.core.movis_layer import StyledSubtitleLayer
 
