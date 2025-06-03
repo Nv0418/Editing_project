@@ -23,6 +23,68 @@ from subtitle_styles.core.json_style_loader import StyleLoader
 from subtitle_styles.core.movis_layer import StyledSubtitleLayer
 
 
+def get_resolution_from_format(video_format: str) -> Tuple[int, int]:
+    """
+    Convert video format ratio to resolution.
+    
+    Args:
+        video_format: String format like "9:16" or "16:9"
+    
+    Returns:
+        Tuple of (width, height) for the resolution
+    
+    Supported formats:
+        - "9:16" → 1080x1920 (vertical/portrait - Instagram, TikTok, YouTube Shorts)
+        - "16:9" → 1920x1080 (horizontal/landscape - YouTube, standard video)
+        - "4:5" → 1080x1350 (Instagram feed posts)
+        - "1:1" → 1080x1080 (Instagram square posts)
+    """
+    format_map = {
+        "9:16": (1080, 1920),    # Vertical - Stories, Reels, Shorts
+        "16:9": (1920, 1080),    # Horizontal - YouTube, TV
+        "4:5": (1080, 1350),     # Instagram portrait feed
+        "1:1": (1080, 1080),     # Square - Instagram/Facebook
+        "21:9": (2560, 1080),    # Ultrawide cinematic
+        "4:3": (1440, 1080),     # Classic TV format
+    }
+    
+    # Normalize the format string (remove spaces, make lowercase)
+    normalized_format = video_format.strip().lower()
+    
+    # Check if format exists in our map
+    if normalized_format in format_map:
+        return format_map[normalized_format]
+    
+    # If not found, try to parse custom format
+    try:
+        if ":" in normalized_format:
+            width_ratio, height_ratio = normalized_format.split(":")
+            width_ratio = float(width_ratio)
+            height_ratio = float(height_ratio)
+            
+            # Calculate resolution maintaining Full HD quality
+            if width_ratio > height_ratio:
+                # Landscape orientation
+                width = 1920
+                height = int(1920 * (height_ratio / width_ratio))
+            else:
+                # Portrait orientation
+                height = 1920
+                width = int(1920 * (width_ratio / height_ratio))
+            
+            # Ensure even dimensions for video encoding
+            width = width if width % 2 == 0 else width + 1
+            height = height if height % 2 == 0 else height + 1
+            
+            return (width, height)
+    except:
+        pass
+    
+    # Default to vertical format if invalid input
+    print(f"Warning: Invalid format '{video_format}'. Defaulting to 9:16 (1080x1920)")
+    return (1080, 1920)
+
+
 class LayerManager:
     """Manages multiple video/audio/subtitle layers with precise timing control"""
     
@@ -801,8 +863,17 @@ class DynamicVideoEditor:
         
         # Create composition
         comp_config = config.get('composition', {})
+        
+        # Determine resolution from format or explicit resolution
+        if 'resolution' in comp_config:
+            resolution = tuple(comp_config['resolution'])
+        elif 'format' in comp_config:
+            resolution = get_resolution_from_format(comp_config['format'])
+        else:
+            resolution = (1080, 1920)  # Default to 9:16
+        
         self.create_composition(
-            resolution=tuple(comp_config.get('resolution', [1080, 1920])),
+            resolution=resolution,
             duration=comp_config.get('duration', 10.0),
             fps=comp_config.get('fps', 30),
             background_color=comp_config.get('background_color')
@@ -1236,7 +1307,9 @@ Examples:
     
     # Configuration
     parser.add_argument('--config', type=str, help='Path to JSON configuration file')
-    parser.add_argument('--resolution', type=str, default='1080x1920', help='Output resolution (WIDTHxHEIGHT)')
+    parser.add_argument('--format', type=str, default='9:16', 
+                        help='Video format ratio (9:16, 16:9, 4:5, 1:1, etc.)')
+    parser.add_argument('--resolution', type=str, help='Output resolution (WIDTHxHEIGHT) - overrides format')
     parser.add_argument('--fps', type=int, default=30, help='Output frame rate')
     parser.add_argument('--background-color', type=str, help='Background color as R,G,B (e.g., "0,0,0" for black)')
     
@@ -1261,9 +1334,14 @@ Examples:
     else:
         # Build configuration from command line arguments
         
-        # Parse resolution
-        width, height = map(int, args.resolution.split('x'))
-        resolution = (width, height)
+        # Parse resolution - use format parameter or explicit resolution
+        if args.resolution:
+            # User provided explicit resolution
+            width, height = map(int, args.resolution.split('x'))
+            resolution = (width, height)
+        else:
+            # Use format parameter to determine resolution
+            resolution = get_resolution_from_format(args.format)
         
         # Parse background color
         bg_color = None

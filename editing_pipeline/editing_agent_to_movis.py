@@ -21,7 +21,8 @@ from dynamic_video_editor import (
     LayerManager,
     AnimationController,
     AudioManager,
-    PlatformExporter
+    PlatformExporter,
+    get_resolution_from_format
 )
 
 # Configure logging
@@ -83,7 +84,13 @@ class EditingAgentConverter:
         
         # Validate composition
         comp = plan["composition"]
-        comp_required = ["resolution", "duration", "fps"]
+        
+        # Check for either format or resolution
+        if "format" not in comp and "resolution" not in comp:
+            raise ValueError("Composition must have either 'format' or 'resolution' field")
+        
+        # Check other required fields
+        comp_required = ["duration", "fps"]
         for field in comp_required:
             if field not in comp:
                 raise ValueError(f"Missing composition field: {field}")
@@ -138,8 +145,18 @@ class EditingAgentConverter:
         
         # Create main composition
         comp_config = plan["composition"]
+        
+        # Determine resolution from format or explicit resolution
+        if "resolution" in comp_config:
+            resolution = tuple(comp_config["resolution"])
+        elif "format" in comp_config:
+            resolution = get_resolution_from_format(comp_config["format"])
+        else:
+            # Default to 9:16 vertical format
+            resolution = (1080, 1920)
+            
         self.editor.create_composition(
-            resolution=tuple(comp_config["resolution"]),
+            resolution=resolution,
             duration=comp_config["duration"],
             fps=comp_config.get("fps", 30),
             background_color=comp_config.get("background_color")
@@ -384,16 +401,24 @@ Examples:
   # Convert editing plan to video
   python3 editing_agent_to_movis.py plan.json output.mp4
 
+  # Convert with custom format (overrides JSON)
+  python3 editing_agent_to_movis.py plan.json output.mp4 --format 16:9
+
   # Convert with custom platform
   python3 editing_agent_to_movis.py plan.json output.mp4 --platform youtube_shorts
 
   # Convert without asset validation (for testing)
   python3 editing_agent_to_movis.py plan.json output.mp4 --no-validate-assets
+
+  # Multiple overrides
+  python3 editing_agent_to_movis.py plan.json output.mp4 --format 1:1 --platform instagram --quality high
         """
     )
     
     parser.add_argument('json_file', type=str, help='Path to Editing Agent JSON plan')
     parser.add_argument('output_file', type=str, help='Output video file path')
+    parser.add_argument('--format', type=str,
+                        help='Override video format from JSON plan (e.g., 9:16, 16:9, 4:5, 1:1)')
     parser.add_argument('--platform', type=str, 
                         choices=['instagram', 'tiktok', 'youtube_shorts', 'youtube'],
                         help='Override platform from JSON plan')
@@ -427,11 +452,17 @@ Examples:
         # Create converter and process
         converter = EditingAgentConverter()
         
-        # Override platform/quality if specified
-        if args.platform or args.quality:
+        # Override format/platform/quality if specified
+        if args.format or args.platform or args.quality:
             with open(args.json_file, 'r') as f:
                 plan = json.load(f)
             
+            if args.format:
+                # Override format in composition
+                plan.setdefault("composition", {})["format"] = args.format
+                # Remove resolution if present to avoid conflicts
+                if "resolution" in plan["composition"]:
+                    del plan["composition"]["resolution"]
             if args.platform:
                 plan.setdefault("export", {})["platform"] = args.platform
             if args.quality:

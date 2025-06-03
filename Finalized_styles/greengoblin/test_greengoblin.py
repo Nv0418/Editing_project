@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
+"""
+Test script for Green Goblin Caption style
+Clean text style without glow effects using Manrope ExtraBold font
+"""
 import os
 import sys
 import json
 
 # Add project root to Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 import movis as mv
 from subtitle_styles.core.json_style_loader import StyleLoader
@@ -16,18 +20,18 @@ def load_parakeet_data(file_path):
         data = json.load(f)
     return data['word_timestamps']
 
-def create_deep_diver_video():
-    """Create a video with Deep Diver caption style."""
+def create_greengoblin_video():
+    """Create a video with Green Goblin Caption style."""
     
     # Configuration
     resolution = (1080, 1920)  # Instagram 9:16 format
     fps = 30
     
     # File paths
-    project_root = os.path.dirname(os.path.dirname(__file__))
+    project_root = os.path.join(os.path.dirname(__file__), '..', '..')
     parakeet_file = os.path.join(project_root, 'other_root_files', 'parakeet_output.json')
     audio_file = os.path.join(project_root, 'other_root_files', 'got_script.mp3')
-    output_file = os.path.join(project_root, '30may_test', 'deep_diver_got_test.mp4')
+    output_file = os.path.join(os.path.dirname(__file__), 'greengoblin_test.mp4')
     json_style_file = os.path.join(project_root, 'subtitle_styles', 'config', 'subtitle_styles_v3.json')
     
     # Load word timestamps
@@ -37,8 +41,8 @@ def create_deep_diver_video():
     audio_layer = mv.layer.Audio(str(audio_file))
     duration = audio_layer.duration
     
-    # Load Deep Diver style configuration
-    style = StyleLoader.load_style_from_json(json_style_file, "deep_diver")
+    # Load Green Goblin style configuration
+    style = StyleLoader.load_style_from_json(json_style_file, "greengoblin")
     
     # Create composition
     scene = mv.layer.Composition(
@@ -46,36 +50,32 @@ def create_deep_diver_video():
         duration=duration
     )
     
-    # Add black background using Rectangle
+    # Add black background
     background = mv.layer.Rectangle(
         size=resolution,
         duration=duration,
-        color=(0, 0, 0)  # RGB tuple
+        color=(0, 0, 0)
     )
     scene.add_layer(background, name='background')
     
-    # Create subtitle layer with Deep Diver style
+    # Create subtitle layer
     subtitle_layer = StyledSubtitleLayer(
         words=word_timestamps,
         style=style,
         resolution=resolution,
-        position="bottom",  # Deep Diver uses bottom positioning as per config
-        safe_zones=True     # Instagram safe zone compliance
+        position="bottom",
+        safe_zones=True
     )
     
-    # Add subtitle layer to composition
-    scene.add_layer(
-        subtitle_layer,
-        name='subtitles',
-        offset=0.0
-    )
-    
-    # Add audio track (use the same audio layer we already loaded)
+    # Add layers
+    scene.add_layer(subtitle_layer, name='subtitles', offset=0.0)
     scene.add_layer(audio_layer, name='audio')
     
     # Export video
-    print(f"Generating Deep Diver style video...")
+    print(f"Generating Green Goblin Caption style video...")
     print(f"Output: {output_file}")
+    print(f"Duration: {duration:.1f} seconds")
+    print(f"Features: Manrope ExtraBold font, white→green highlighting, 1.1x scale, clean appearance")
     
     scene.write_video(
         output_file,
@@ -83,7 +83,7 @@ def create_deep_diver_video():
         audio_codec='aac'
     )
     
-    print(f"Video successfully generated at: {output_file}")
+    print(f"Green Goblin video successfully generated at: {output_file}")
 
 if __name__ == "__main__":
-    create_deep_diver_video()
+    create_greengoblin_video()

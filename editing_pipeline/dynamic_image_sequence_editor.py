@@ -21,7 +21,7 @@ movis_dir = os.path.join(current_dir, 'movis')
 if os.path.exists(movis_dir):
     sys.path.insert(0, movis_dir)
 
-from dynamic_video_editor import DynamicVideoEditor
+from dynamic_video_editor import DynamicVideoEditor, get_resolution_from_format
 
 
 def load_cut_times(cuts_json_path: Path) -> List[Dict[str, Any]]:
@@ -137,7 +137,7 @@ def calculate_total_duration(cut_times: List[Dict]) -> float:
     return cut_times[-1]['cut_time'] + 0.5  # Add small buffer at end
 
 
-def create_timeline_config(assets: Dict[str, Any], cut_times: List[Dict]) -> Dict[str, Any]:
+def create_timeline_config(assets: Dict[str, Any], cut_times: List[Dict], video_format: str = "9:16") -> Dict[str, Any]:
     """Create complete timeline configuration"""
     
     total_duration = calculate_total_duration(cut_times)
@@ -145,10 +145,13 @@ def create_timeline_config(assets: Dict[str, Any], cut_times: List[Dict]) -> Dic
     # Create image sequence
     image_sequence = create_image_sequence_config(assets['images'], cut_times)
     
+    # Get resolution from format
+    resolution = get_resolution_from_format(video_format)
+    
     # Build timeline configuration
     config = {
         "composition": {
-            "resolution": [1080, 1920],  # Instagram format
+            "resolution": list(resolution),  # Convert tuple to list for JSON
             "duration": total_duration,
             "fps": 30,
             "background_color": [0, 0, 0]  # Black background
@@ -182,7 +185,7 @@ def create_timeline_config(assets: Dict[str, Any], cut_times: List[Dict]) -> Dic
     return config
 
 
-def generate_video(assets_dir: Path, output_path: Path, save_config: bool = False):
+def generate_video(assets_dir: Path, output_path: Path, video_format: str = "9:16", save_config: bool = False):
     """Generate video from assets directory"""
     
     print(f"\n🎬 Dynamic Video Generation from Assets")
@@ -223,7 +226,8 @@ def generate_video(assets_dir: Path, output_path: Path, save_config: bool = Fals
     
     # Create timeline configuration
     print(f"\n🎯 Creating Timeline Configuration...")
-    timeline_config = create_timeline_config(assets, cut_times)
+    print(f"Video Format: {video_format}")
+    timeline_config = create_timeline_config(assets, cut_times, video_format)
     
     total_duration = timeline_config['composition']['duration']
     print(f"Total video duration: {total_duration:.2f}s")
@@ -275,17 +279,20 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Generate video from assets folder
+  # Generate video from assets folder (default 9:16)
   python3 dynamic_assets_video_generator.py
 
-  # Specify custom output path
-  python3 dynamic_assets_video_generator.py --output my_video.mp4
+  # Generate horizontal video (16:9)
+  python3 dynamic_assets_video_generator.py --format 16:9
+
+  # Generate square video (1:1)
+  python3 dynamic_assets_video_generator.py --format 1:1 --output square_video.mp4
 
   # Save timeline configuration
   python3 dynamic_assets_video_generator.py --save-config
 
-  # Use custom assets directory
-  python3 dynamic_assets_video_generator.py --assets-dir /path/to/assets
+  # Use custom assets directory with format
+  python3 dynamic_assets_video_generator.py --assets-dir /path/to/assets --format 4:5
         """
     )
     
@@ -294,6 +301,8 @@ Examples:
                         help='Path to assets directory (default: ./assets)')
     parser.add_argument('--output', '-o', type=str, default='dynamic_assets_video.mp4',
                         help='Output video file path')
+    parser.add_argument('--format', type=str, default='9:16',
+                        help='Video format ratio (9:16, 16:9, 4:5, 1:1, etc.)')
     parser.add_argument('--save-config', action='store_true',
                         help='Save timeline configuration JSON')
     parser.add_argument('--verbose', '-v', action='store_true',
@@ -318,7 +327,7 @@ Examples:
     output_path = Path(args.output)
     
     # Generate video
-    success = generate_video(assets_dir, output_path, args.save_config)
+    success = generate_video(assets_dir, output_path, args.format, args.save_config)
     
     if success:
         return 0
