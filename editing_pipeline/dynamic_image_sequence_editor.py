@@ -39,13 +39,25 @@ def discover_assets(assets_dir: Path) -> Dict[str, Any]:
         'cuts_file': None
     }
     
-    # Find all numbered images (looking for image_N_timestamp.png pattern)
+    # Find all numbered images (multiple patterns supported)
     for i in range(1, 33):  # Looking for 1-32
-        # Look for the pattern image_N_timestamp.png
-        matching_files = list(assets_dir.glob(f"image_{i}_*.png"))
-        if matching_files:
-            # Use the first match (should only be one)
-            image_path = matching_files[0]
+        image_path = None
+        
+        # Try different naming patterns
+        patterns = [
+            f"image_{i}_*.png",           # image_N_timestamp.png
+            f"prompt_engineer_image_{i}.png",  # prompt_engineer_image_N.png
+            f"image_{i}.png",             # image_N.png
+            f"beat_{i:02d}.png"           # beat_NN.png
+        ]
+        
+        for pattern in patterns:
+            matching_files = list(assets_dir.glob(pattern))
+            if matching_files:
+                image_path = matching_files[0]
+                break
+        
+        if image_path:
             assets['images'].append({
                 'number': i,
                 'path': str(image_path)
@@ -97,6 +109,7 @@ def create_image_sequence_config(images: List[Dict], cut_times: List[Dict]) -> L
             start_time = cut_times[i-1]['cut_time']
         
         end_time = cut['cut_time']
+        duration = end_time - start_time  # Calculate duration here
         
         # Create image config
         image_config = {
@@ -105,22 +118,37 @@ def create_image_sequence_config(images: List[Dict], cut_times: List[Dict]) -> L
             "end_time": end_time,
             "name": f"image_{i+1}",
             "position": [540, 960],  # Center position for 1080x1920
-            "scale": 1.0,
+            "scale": 1.2,  # Default scale to ensure full coverage
             "opacity": 1.0
         }
         
-        # Add Ken Burns effect for variety (alternate zoom in/out)
-        if i % 2 == 0:
+        # Add simple fade transition to prevent automatic zoom transitions
+        if i > 0:  # Not for the first image
+            image_config["transition"] = {
+                "type": "fade",
+                "duration": 0.3  # Quick fade between images
+            }
+        
+        # Add Ken Burns effect very sparingly - only for special moments
+        # This prevents excessive zooming
+        if i == 0 and duration > 3.0:  # Opening shot
             image_config["ken_burns"] = {
                 "type": "zoom_in",
                 "start_scale": 1.0,
-                "end_scale": 1.15
+                "end_scale": 1.03  # Very subtle 3% zoom
             }
-        else:
+        elif i == len(images) - 1 and duration > 3.0:  # Closing shot
             image_config["ken_burns"] = {
                 "type": "zoom_out", 
-                "start_scale": 1.15,
+                "start_scale": 1.03,
                 "end_scale": 1.0
+            }
+        elif i % 10 == 5 and duration > 3.0:  # Only every 10th image
+            # Subtle pan effect instead of zoom
+            image_config["ken_burns"] = {
+                "type": "zoom_in",
+                "start_scale": 1.0,
+                "end_scale": 1.02  # Almost imperceptible 2% zoom
             }
         
         sequence.append(image_config)
@@ -177,7 +205,7 @@ def create_timeline_config(assets: Dict[str, Any], cut_times: List[Dict], video_
     if assets['transcription_file']:
         config["subtitles"] = {
             "parakeet_data": assets['transcription_file'],
-            "style": "popling_caption",
+            "style": "simple_caption",  # Use a more reliable style
             "position": "bottom"
         }
         print(f"Added subtitles: {assets['transcription_file'].split('/')[-1]}")
@@ -262,7 +290,7 @@ def generate_video(assets_dir: Path, output_path: Path, video_format: str = "9:1
         if assets['audio_file']:
             print(f"   Audio: ✓ Included")
         if assets['transcription_file']:
-            print(f"   Subtitles: ✓ Highlight Caption style")
+            print(f"   Subtitles: ✓ Simple Caption style")
         
         return True
         

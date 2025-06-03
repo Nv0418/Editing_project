@@ -14,8 +14,9 @@ from typing import Dict, List, Tuple, Optional, Any, Union
 import numpy as np
 from datetime import datetime
 
-# Add current directory to path for imports
+# Add current directory and parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import movis as mv
 from movis import BlendingMode
@@ -723,7 +724,8 @@ class DynamicVideoEditor:
         self.platform_exporter = PlatformExporter()
         
         # Load subtitle style configuration
-        self.subtitle_styles_path = Path(__file__).parent / "subtitle_styles" / "config" / "subtitle_styles_v3.json"
+        # Look for subtitle styles in parent directory
+        self.subtitle_styles_path = Path(__file__).parent.parent / "subtitle_styles" / "config" / "subtitle_styles_v3.json"
     
     @staticmethod
     def calculate_cover_scale(image_size: Tuple[int, int], target_size: Tuple[int, int]) -> float:
