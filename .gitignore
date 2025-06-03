@@ -104,5 +104,6 @@ generated_editing_plan.json
 temp_editing_plan.json
 test_*.mp4
 test_*.json
-temp_samples/assets_3/
+temp_samples/
 test_image_sequence.py
+assets_3/
