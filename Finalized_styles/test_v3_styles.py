@@ -6,7 +6,7 @@ Tests each style and creates videos named by style only
 
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import movis as mv
 from pathlib import Path
@@ -37,7 +37,7 @@ def create_test_video(style_name, json_file, output_dir):
     print("-" * 40)
     
     # Paths
-    project_root = Path(__file__).resolve().parent
+    project_root = Path(__file__).resolve().parent.parent
     audio_file = project_root / "other_root_files" / "got_script.mp3"
     transcription_file = project_root / "other_root_files" / "parakeet_output.json"
     
@@ -125,7 +125,7 @@ def create_test_video(style_name, json_file, output_dir):
 def test_all_v3_styles():
     """Test all styles from v3 configuration"""
     
-    project_root = Path(__file__).resolve().parent
+    project_root = Path(__file__).resolve().parent.parent
     json_file = project_root / "subtitle_styles" / "config" / "subtitle_styles_v3.json"
     
     if not json_file.exists():
@@ -227,7 +227,7 @@ if __name__ == "__main__":
     
     if args.list:
         # List available styles
-        project_root = Path(__file__).resolve().parent
+        project_root = Path(__file__).resolve().parent.parent
         json_file = project_root / "subtitle_styles" / "config" / "subtitle_styles_v3.json"
         styles = StyleLoader.list_available_styles(json_file)
         print("Available styles in v3 configuration:")
@@ -235,7 +235,7 @@ if __name__ == "__main__":
             print(f"  {style_id}: {style_name}")
     elif args.style:
         # Test single style
-        project_root = Path(__file__).resolve().parent
+        project_root = Path(__file__).resolve().parent.parent
         json_file = project_root / "subtitle_styles" / "config" / "subtitle_styles_v3.json"
         test_dir = project_root / "output_test" / "test_result_single"
         test_dir.mkdir(parents=True, exist_ok=True)

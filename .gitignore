@@ -1,4 +1,17 @@
-# Media files
+# Environment and Secret Files (NEVER commit these)
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+*.key
+*.pem
+secrets/
+config/secrets.json
+api_keys.json
+
+# Output and Generated Media (too large for git)
+output_test/
 *.mp4
 *.mov
 *.avi
@@ -8,8 +21,6 @@
 *.wmv
 *.m4v
 *.3gp
-
-# Audio files
 *.mp3
 *.wav
 *.flac
@@ -18,7 +29,7 @@
 *.wma
 *.m4a
 
-# Image files (large/temporary)
+# Large Image Files (generated content)
 *.png
 *.jpg
 *.jpeg
@@ -27,12 +38,18 @@
 *.tiff
 *.webp
 
-# Video/Media directories
-media/
-output_test/
-versions/
+# Node.js dependencies (will be installed on platform)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.package-lock.json
+**/node_modules/
+**/package-lock.json
+**/.package-lock.json
 
-# Python cache
+# Python cache and build files
 __pycache__/
 *.pyc
 *.pyo
@@ -54,20 +71,24 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual environments
+# Virtual environments (platform will create its own)
 venv/
 env/
 ENV/
 .venv/
+.conda/
+conda-meta/
 
-# IDE files
+# IDE and Editor files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.sublime-workspace
+.sublime-project
 
-# OS files
+# OS generated files
 .DS_Store
 .DS_Store?
 ._*
@@ -75,35 +96,65 @@ ENV/
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# Temporary files
+# Temporary and log files
 *.tmp
 *.temp
 *.log
+logs/
 
-# Large assets that shouldn't be in git
+# Large archives and binaries
 *.zip
 *.tar.gz
 *.rar
 *.7z
-
-# Model files and large binaries
 *.bin
 *.model
 *.weights
+*.pkl
+*.pickle
 
-# Node.js dependencies
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-package-lock.json
-
-# Generated/temporary files
-generated_editing_plan.json
-temp_editing_plan.json
+# Test outputs and generated files
 test_*.mp4
 test_*.json
+generated_editing_plan.json
+temp_editing_plan.json
 temp_samples/
-test_image_sequence.py
+versions/
+media/
+
+# Asset directories with large files
 assets_3/
+
+# Cache directories
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# PyCharm
+.idea/
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
